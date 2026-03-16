@@ -98,7 +98,7 @@ export function VictoryScreen() {
         )}
 
         {!rewardCards && (
-          <button onClick={hasMore ? nextEnemy : newGame}>
+          <button onClick={hasMore ? nextEnemy : () => newGame()}>
             {hasMore ? '下一个敌人' : '重新开始'}
           </button>
         )}

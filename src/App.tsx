@@ -86,7 +86,6 @@ function App() {
   const bossPhaseChange = useGameStore(s => s.bossPhaseChange)
   const newGame = useGameStore(s => s.newGame)
   const clearSave = useGameStore(s => s.clearSave)
-  const selectCharacter = useGameStore(s => s.selectCharacter)
   const [hasSave, setHasSave] = useState(false)
 
   // 检查存档
