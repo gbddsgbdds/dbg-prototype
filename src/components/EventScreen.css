@@ -272,3 +272,46 @@
     border-radius: 10px;
   }
 }
+
+/* === 超宽屏幕适配 (≥1400px) === */
+@media (min-width: 1400px) {
+  .event-screen {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .event-card {
+    padding: 2rem;
+  }
+  
+  .event-title {
+    font-size: 1.8rem;
+  }
+  
+  .event-description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  
+  .event-choice-btn {
+    padding: 1rem 1.5rem;
+  }
+  
+  .choice-text {
+    font-size: 1.1rem;
+  }
+  
+  .choice-effects {
+    font-size: 0.9rem;
+  }
+  
+  .effect-item {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .confirm-btn {
+    padding: 0.8rem 3rem;
+    font-size: 1.1rem;
+  }
+}

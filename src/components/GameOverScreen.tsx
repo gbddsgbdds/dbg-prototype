@@ -1,9 +1,22 @@
 import { useGameStore } from '../game/store'
+import { useMetaStore } from '../game/meta'
 import { motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
 
 export function GameOverScreen() {
   const player = useGameStore(s => s.player)
   const cause = player.san <= 0 ? '💀 心素崩溃 — 理智归零' : '💀 你死了...'
+  
+  // 防止重复触发
+  const defeatTriggered = useRef(false)
+  
+  // 触发失败统计（仅一次）
+  useEffect(() => {
+    if (!defeatTriggered.current) {
+      defeatTriggered.current = true
+      useMetaStore.getState().checkAchievements({ type: 'defeat' })
+    }
+  }, [])
 
   return (
     <div className="overlay">

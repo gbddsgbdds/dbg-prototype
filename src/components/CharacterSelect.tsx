@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useGameStore } from '../game/store'
+import { useMetaStore } from '../game/meta'
 import { ALL_CHARACTERS } from '../data/characters'
 import './CharacterSelect.css'
 
@@ -10,6 +11,8 @@ export function CharacterSelect() {
   const handleSelect = (characterId: string) => {
     clearSave()  // 清除旧存档
     selectCharacter(characterId)
+    // 触发游戏开始统计
+    useMetaStore.getState().checkAchievements({ type: 'run_start', characterId })
   }
 
   return (
@@ -37,7 +40,7 @@ export function CharacterSelect() {
           >
             <div className="character-header">
               <span className="character-icon">
-                {char.icon === 'heart' ? '❤️' : char.icon === 'scroll' ? '📜' : '👤'}
+                {char.icon === 'heart' ? '❤️' : char.icon === 'scroll' ? '📜' : char.icon === 'mask' ? '🎭' : '👤'}
               </span>
               <div className="character-titles">
                 <h2 className="character-name">{char.name}</h2>

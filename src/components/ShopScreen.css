@@ -370,3 +370,53 @@
     margin-top: 20px;
   }
 }
+
+/* === 超宽屏幕适配 (≥1400px) === */
+@media (min-width: 1400px) {
+  .shop-screen {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+  
+  .shop-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .player-gold {
+    font-size: 1.3rem;
+    padding: 0.6rem 1.2rem;
+  }
+  
+  .shop-section h3 {
+    font-size: 1.2rem;
+  }
+  
+  .shop-card {
+    padding: 1rem;
+  }
+  
+  .card-cost {
+    width: 32px;
+    height: 32px;
+    font-size: 1rem;
+  }
+  
+  .card-name {
+    font-size: 1.1rem;
+  }
+  
+  .card-desc {
+    font-size: 0.95rem;
+  }
+  
+  .buy-btn {
+    padding: 0.6rem 1.2rem;
+    font-size: 1rem;
+  }
+  
+  .leave-btn {
+    padding: 0.8rem 3rem;
+    font-size: 1.1rem;
+  }
+}

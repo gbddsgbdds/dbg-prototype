@@ -1,5 +1,7 @@
 import { useGameStore } from '../game/store'
+import { useMetaStore } from '../game/meta'
 import { motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
 
 export function VictoryScreen() {
   const rewardCards = useGameStore(s => s.rewardCards)
@@ -11,11 +13,35 @@ export function VictoryScreen() {
   const clearSave = useGameStore(s => s.clearSave)
   const map = useGameStore(s => s.map)
   const selectedNodeId = useGameStore(s => s.selectedNodeId)
+  const characterId = useGameStore(s => s.characterId)
+  const turn = useGameStore(s => s.turn)
+  const player = useGameStore(s => s.player)
   const hasMore = enemyQueue.length > 0
   
   // 检测是否是最终Boss（黑莲老祖）战胜利
   const currentNode = map?.nodes.find(n => n.id === selectedNodeId)
   const isFinalBossVictory = currentNode?.type === 'boss' && currentNode?.enemyDef?.id === 'black_lotus_ancestor'
+  
+  // 用于防止重复触发成就
+  const victoryTriggered = useRef(false)
+  
+  // 触发胜利成就（仅一次）
+  useEffect(() => {
+    if (isFinalBossVictory && !victoryTriggered.current) {
+      victoryTriggered.current = true
+      const metaStore = useMetaStore.getState()
+      metaStore.checkAchievements({
+        type: 'victory',
+        characterId,
+        turnCount: turn,
+        playerHp: player.hp,
+      })
+      // 检查是否在入魔状态下通关
+      if (player.isMad) {
+        metaStore.unlockAchievement('madness_victory')
+      }
+    }
+  }, [isFinalBossVictory, characterId, turn, player.hp, player.isMad])
 
   // 最终Boss胜利结算
   if (isFinalBossVictory && !rewardCards) {

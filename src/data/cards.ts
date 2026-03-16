@@ -10,8 +10,8 @@ const STRIKE: CardDef = {
   cardClass: 'warrior',
   cost: 1,
   rarity: 'starter',
-  description: '造成 8 点伤害。',
-  effects: { damage: 8, shaqiGain: 3 },
+  description: '造成 9 点伤害。',
+  effects: { damage: 9, shaqiGain: 3 },
   icon: 'sword strike',
 }
 
@@ -71,8 +71,8 @@ const HEAVY_STRIKE: CardDef = {
   cardClass: 'warrior',
   cost: 1,
   rarity: 'starter',
-  description: '造成 15 伤害，获得 3 煞气。',
-  effects: { damage: 15, shaqiGain: 3 },
+  description: '造成 14 伤害，获得 3 煞气。',
+  effects: { damage: 14, shaqiGain: 3 },
   icon: 'heavy strike',
 }
 
@@ -230,6 +230,89 @@ const THUNDER_METHOD: CardDef = {
   icon: 'thunder method',
 }
 
+// ==================== 坐忘道初始卡牌 ====================
+
+// 虚剑 - 坐忘道基础攻击（幻象）
+const ILLUSION_SWORD: CardDef = {
+  id: 'illusion_sword',
+  name: '虚剑',
+  type: 'attack',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'starter',
+  description: '【幻象】造成 6 伤害。50%概率双倍效果，25%概率无效果。',
+  effects: { damage: 6, shaqiGain: 2 },
+  icon: 'illusion sword',
+  illusion: true,
+}
+
+// 假面 - 坐忘道基础防御（幻象）
+const FALSE_MASK: CardDef = {
+  id: 'false_mask',
+  name: '假面',
+  type: 'skill',
+  cardClass: 'puppet',
+  cost: 1,
+  rarity: 'starter',
+  description: '【幻象】获得 5 护甲。50%概率双倍效果，25%概率无效果。',
+  effects: { block: 5, shaqiGain: 0 },
+  icon: 'false mask',
+  illusion: true,
+}
+
+// 真假难辨 - 坐忘道随机攻击
+const TRUTH_OR_DARE: CardDef = {
+  id: 'truth_or_dare',
+  name: '真假难辨',
+  type: 'attack',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'starter',
+  description: '造成 8 伤害，50% 概率再造成 8 伤害。',
+  effects: { damage: 8, shaqiGain: 3 },
+  icon: 'truth or dare',
+}
+
+// 欺天之术 - 坐忘道抽牌
+const DECEIVE_HEAVEN: CardDef = {
+  id: 'deceive_heaven',
+  name: '欺天之术',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'starter',
+  description: '抽 2 张牌，25% 概率弃 2 张牌。',
+  effects: { draw: 2, shaqiGain: 0 },
+  icon: 'deceive heaven',
+}
+
+// 坐忘心经 - 坐忘道能力牌
+const ZUOWANG_SUTRA: CardDef = {
+  id: 'zuowang_sutra',
+  name: '坐忘心经',
+  type: 'power',
+  cardClass: 'sorcerer',
+  cost: 2,
+  rarity: 'starter',
+  description: '本战斗中，幻象牌双倍效果概率 +25%。',
+  effects: { selfBuff: [{ type: 'illusionBoost', amount: 25, duration: 999 }] },
+  icon: 'zuowang sutra',
+}
+
+// 偷天换日 - 坐忘道高费幻象攻击
+const STEAL_HEAVEN: CardDef = {
+  id: 'steal_heaven',
+  name: '偷天换日',
+  type: 'attack',
+  cardClass: 'sorcerer',
+  cost: 2,
+  rarity: 'starter',
+  description: '【幻象】造成 12 伤害。50%概率双倍效果，25%概率无效果。',
+  effects: { damage: 12, shaqiGain: 4 },
+  icon: 'steal heaven',
+  illusion: true,
+}
+
 // ==================== 奖励卡池（第 1 层） ====================
 
 const SHOCK_SLASH: CardDef = {
@@ -345,6 +428,22 @@ export const BLOOD_CORPSE: EnemyDef = {
     { type: 'buff', value: 0, buffType: 'weak', buffAmount: 1 },
   ],
   icon: 'blood corpse',
+}
+
+// 鬼面 - 第1层防御型敌人
+export const GHOST_FACE: EnemyDef = {
+  id: 'ghost_face',
+  name: '鬼面',
+  hp: 10,
+  type: 'normal',
+  intents: [
+    { type: 'defend', value: 8 },
+    { type: 'defend', value: 6 },
+    { type: 'attack', value: 5 },
+    { type: 'attack', value: 5 },
+  ],
+  specialMechanics: '低HP高防御，适合新手练习',
+  icon: 'ghost face',
 }
 
 // ==================== Boss ====================
@@ -515,6 +614,22 @@ export const BLOOD_PUPPET: EnemyDef = {
   icon: 'blood puppet',
 }
 
+// 阴魂 - 第2层理智攻击型
+export const YIN_SOUL: EnemyDef = {
+  id: 'yin_soul',
+  name: '阴魂',
+  hp: 20,
+  type: 'normal',
+  intents: [
+    { type: 'defend', value: 6 },
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 8 },
+    { type: 'attack', value: 9 },
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 10 },
+  ],
+  specialMechanics: '持续攻击玩家理智',
+  icon: 'yin soul',
+}
+
 // ==================== 第 3 层奖励卡池 ====================
 
 // 虚空斩 - 道心联动攻击
@@ -669,10 +784,10 @@ export const BLOOD_CORPSE_2: EnemyDef = {
   hp: 40,
   type: 'normal',
   intents: [
-    { type: 'attack', value: 10 },
-    { type: 'attack', value: 10 },
+    { type: 'attack', value: 9 },
+    { type: 'attack', value: 9 },
     { type: 'defend', value: 12 },
-    { type: 'attack', value: 14 },
+    { type: 'attack', value: 12 },
   ],
   specialMechanics: '高血量防御型',
   icon: 'blood corpse 2',
@@ -695,26 +810,43 @@ export const BLOOD_SHA_MASTER: EnemyDef = {
   icon: 'blood sha master',
 }
 
+// 血影 - 第3层精英（备选）
+export const BLOOD_SHADOW: EnemyDef = {
+  id: 'blood_shadow',
+  name: '血影',
+  hp: 65,
+  type: 'elite',
+  intents: [
+    { type: 'attack', value: 14 },
+    { type: 'attack', value: 14 },
+    { type: 'defend', value: 12 },
+    { type: 'attack', value: 18 },
+    { type: 'heal', value: 15 },
+  ],
+  specialMechanics: '高伤自愈型，需要速战速决',
+  icon: 'blood shadow',
+}
+
 // ==================== 第 3 层 Boss ====================
 
 // 黑莲老祖 - 最终Boss
 const BLACK_LOTUS_ANCESTOR: EnemyDef = {
   id: 'black_lotus_ancestor',
   name: '黑莲老祖',
-  hp: 120,
+  hp: 110,
   type: 'boss',
   phase: 1,
-  phaseThreshold: 60,
+  phaseThreshold: 55,
   specialMechanics: '黑莲化身，修仙界魔头。开场施加黑莲诅咒（每回合-5理智），阶段2可恢复HP。',
   // 阶段1意图
   intents: [
-    { type: 'attack', value: 18 },
-    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 10 },
+    { type: 'attack', value: 16 },
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 8 },
     { type: 'defend', value: 15 },
-    { type: 'attack', value: 18 },
-    // 阶段2额外意图（HP <= 60时）
-    { type: 'heal', value: 10 },  // 黑莲绽放：恢复HP
-    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 15 },  // 心素撕裂
+    { type: 'attack', value: 16 },
+    // 阶段2额外意图（HP <= 55时）
+    { type: 'heal', value: 8 },  // 黑莲绽放：恢复HP
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 12 },  // 心素撕裂
   ],
   icon: 'black lotus ancestor',
 }
@@ -726,7 +858,7 @@ export const REWARD_CARDS_LAYER2: CardDef[] = [
   NUO_DANCE, BLOOD_SACRIFICE, MIND_EYE,
 ]
 
-export const ALL_ENEMIES_LAYER2: EnemyDef[] = [SHA_GHOST, HEART_DEMON]
+export const ALL_ENEMIES_LAYER2: EnemyDef[] = [SHA_GHOST, HEART_DEMON, YIN_SOUL]
 export const ELITE_ENEMY_LAYER2: EnemyDef = BLOOD_PUPPET
 
 // ==================== 第 3 层导出 ====================
@@ -739,6 +871,7 @@ export const REWARD_CARDS_LAYER3: CardDef[] = [
 
 export const ALL_ENEMIES_LAYER3: EnemyDef[] = [SHA_DEMON, HEART_SHA, BLOOD_CORPSE_2]
 export const ELITE_ENEMY_LAYER3: EnemyDef = BLOOD_SHA_MASTER
+export const ELITE_ENEMY_LAYER3_ALT: EnemyDef = BLOOD_SHADOW
 export const BOSS_ENEMY_LAYER3: EnemyDef = BLACK_LOTUS_ANCESTOR
 
 // ==================== 基础导出 ====================
@@ -759,7 +892,7 @@ export const REWARD_CARDS: CardDef[] = [
   SHIELD_OF_FAITH, WARRIOR_ROAR, MADNESS_MANTRA,
 ]
 
-export const ALL_ENEMIES: EnemyDef[] = [JAW_WORM, GHOST]
+export const ALL_ENEMIES: EnemyDef[] = [JAW_WORM, GHOST, GHOST_FACE]
 export const ELITE_ENEMY: EnemyDef = BLOOD_CORPSE
 export const BOSS_ENEMY: EnemyDef = DAN_YANGZI
 
@@ -772,6 +905,8 @@ const ALL_CARD_DEFS: CardDef[] = [
   BURN_BODY, SHIELD_OF_FAITH, WARRIOR_ROAR, MADNESS_MANTRA, EXORCISM_TALISMAN, CALM_HEART,
   // 法教初始卡牌
   TALISMAN_SWORD, PROTECTION_CHARM, TRUE_FIRE_CHARM, GOLDEN_LIGHT_CHARM, EXORCISM_CHARM, THUNDER_METHOD,
+  // 坐忘道初始卡牌
+  ILLUSION_SWORD, FALSE_MASK, TRUTH_OR_DARE, DECEIVE_HEAVEN, ZUOWANG_SUTRA, STEAL_HEAVEN,
   // 第1层奖励卡
   SHOCK_SLASH, IRON_WAVE, BLOOD_DRAIN, QUICK_STRIKE, DAOXIN_POWER, BLOOD_MERGE,
   // 第2层奖励卡

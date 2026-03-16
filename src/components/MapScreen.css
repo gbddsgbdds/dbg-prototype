@@ -434,3 +434,59 @@
     }
   }
 }
+
+/* === 超宽屏幕适配 (≥1400px) === */
+@media (min-width: 1400px) {
+  .map-screen {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  
+  .map-header h2 {
+    font-size: 1.8rem;
+  }
+  
+  .map-node {
+    width: 80px;
+    height: 80px;
+    font-size: 1.2rem;
+  }
+  
+  .map-node.boss {
+    width: 100px;
+    height: 100px;
+    font-size: 1.5rem;
+  }
+  
+  .map-floor-label {
+    font-size: 1rem;
+  }
+  
+  .map-action {
+    max-width: 600px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .enter-btn {
+    padding: 0.8rem 2.5rem;
+    font-size: 1.2rem;
+  }
+}
+
+/* === 超超宽屏幕 (≥1800px) === */
+@media (min-width: 1800px) {
+  .map-screen {
+    max-width: 1200px;
+  }
+  
+  .map-node {
+    width: 90px;
+    height: 90px;
+  }
+  
+  .map-node.boss {
+    width: 110px;
+    height: 110px;
+  }
+}

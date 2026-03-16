@@ -53,11 +53,38 @@ export const CHARACTER_FAJIAO: CharacterDef = {
 }
 
 /**
+ * 坐忘道角色：骰子
+ * 
+ * 坐忘道人，以假乱真。以幻象诡道为核心。
+ * 特点：高风险赌博，随机效果，运气为王
+ */
+export const CHARACTER_ZUOWANG: CharacterDef = {
+  id: 'zuowang',
+  name: '骰子',
+  title: '坐忘道人',
+  maxHp: 70,
+  maxSan: 100,
+  maxShaqi: 100,
+  maxEnergy: 3,
+  startingDeck: [
+    'illusion_sword', 'illusion_sword', 'illusion_sword', 'illusion_sword',  // 4x 虚剑
+    'false_mask', 'false_mask', 'false_mask', 'false_mask',  // 4x 假面
+    'truth_or_dare',      // 1x 真假难辨
+    'deceive_heaven',     // 1x 欺天之术
+    'zuowang_sutra',      // 1x 坐忘心经
+    'steal_heaven',       // 1x 偷天换日
+  ],
+  icon: 'mask',
+  description: '以假乱真，幻象诡道。赌博型角色，高风险高回报。',
+}
+
+/**
  * 所有可用角色
  */
 export const ALL_CHARACTERS: CharacterDef[] = [
   CHARACTER_XINSU,
   CHARACTER_FAJIAO,
+  CHARACTER_ZUOWANG,
 ]
 
 /**

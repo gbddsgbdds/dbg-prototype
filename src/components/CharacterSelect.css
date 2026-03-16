@@ -156,3 +156,54 @@
     max-width: 350px;
   }
 }
+
+/* === 超宽屏幕适配 (≥1400px) === */
+@media (min-width: 1400px) {
+  .character-select-screen {
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  
+  .character-select-screen h1 {
+    font-size: 2.8rem;
+  }
+  
+  .character-list {
+    gap: 2rem;
+  }
+  
+  .character-card {
+    max-width: 320px;
+    padding: 2rem;
+  }
+  
+  .character-icon {
+    font-size: 4rem;
+  }
+  
+  .character-name {
+    font-size: 1.5rem;
+  }
+  
+  .character-hp {
+    font-size: 1rem;
+  }
+  
+  .character-desc {
+    font-size: 0.95rem;
+  }
+  
+  .character-tags {
+    gap: 0.8rem;
+  }
+  
+  .character-tag {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  .select-btn {
+    padding: 0.8rem 2rem;
+    font-size: 1.1rem;
+  }
+}

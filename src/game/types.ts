@@ -110,6 +110,7 @@ export interface CardDef {
   effects: CardEffect
   icon?: string
   isHallucination?: boolean  // 心素幻觉牌标记
+  illusion?: boolean         // 坐忘道幻象牌标记（随机效果）
 }
 
 // 敌人意图

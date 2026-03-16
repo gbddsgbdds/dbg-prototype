@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef, GameMap, MapNode, MapNodeType, ShopItem, GameEvent, DamageFloatItem, CharacterDef } from './types'
-import { REWARD_CARDS, REWARD_CARDS_LAYER2, REWARD_CARDS_LAYER3, BOSS_ENEMY_LAYER3, ALL_ENEMIES, ALL_ENEMIES_LAYER2, ALL_ENEMIES_LAYER3, ELITE_ENEMY, ELITE_ENEMY_LAYER2, ELITE_ENEMY_LAYER3, getCardsByIds } from '../data/cards'
+import { REWARD_CARDS, REWARD_CARDS_LAYER2, REWARD_CARDS_LAYER3, BOSS_ENEMY_LAYER3, ALL_ENEMIES, ALL_ENEMIES_LAYER2, ALL_ENEMIES_LAYER3, ELITE_ENEMY, ELITE_ENEMY_LAYER2, ELITE_ENEMY_LAYER3, ELITE_ENEMY_LAYER3_ALT, getCardsByIds } from '../data/cards'
 import { getCharacterById, CHARACTER_XINSU } from '../data/characters'
 import { getRandomEvent } from '../data/events'
 import { playSound } from '../utils/soundManager'
+import { useMetaStore } from './meta'
 
 // ==================== 存档版本 ====================
 // 存档版本号 - 用于未来版本迁移
@@ -107,9 +108,9 @@ function generateMap(): GameMap {
         else if (layer >= 4) enemies = ALL_ENEMIES_LAYER3
         enemyDef = shuffle([...enemies])[0]
       } else if (type === 'elite') {
-        // 第1-2层使用第1层精英，第3层使用第2层精英，第4层使用第3层精英
+        // 第1-2层使用第1层精英，第3层使用第2层精英，第4层使用第3层精英（随机选择）
         if (layer === 3) enemyDef = ELITE_ENEMY_LAYER2
-        else if (layer >= 4) enemyDef = ELITE_ENEMY_LAYER3
+        else if (layer >= 4) enemyDef = Math.random() < 0.5 ? ELITE_ENEMY_LAYER3 : ELITE_ENEMY_LAYER3_ALT
         else enemyDef = ELITE_ENEMY
       } else if (type === 'boss') {
         // 最终Boss使用第3层Boss
@@ -420,10 +421,37 @@ export const useGameStore = create<GameState>()(
     }
     const conditionMet = checkCondition()
 
+    // 幻象机制（坐忘道专属）
+    // 50% 正常效果，25% 双倍效果，25% 无效果
+    let illusionMultiplier = 1
+    let illusionNoEffect = false
+    if (card.illusion) {
+      // 检查是否有坐忘心经加成
+      const illusionBoost = p.buffs.find(b => b.type === 'illusionBoost')
+      const bonusChance = illusionBoost ? illusionBoost.amount : 0  // 额外双倍概率
+      
+      const roll = Math.random() * 100
+      if (roll < 25 + bonusChance) {
+        // 双倍效果
+        illusionMultiplier = 2
+        log(`🌟 幻象成真！效果翻倍！`)
+      } else if (roll < 50 + bonusChance) {
+        // 无效果
+        illusionNoEffect = true
+        log(`💨 幻象消散...无效果`)
+      }
+      // else: 50% - bonusChance 正常效果
+    }
+
     // 攻击
-    if (fx.damage && fx.damage > 0) {
+    if (fx.damage && fx.damage > 0 && !illusionNoEffect) {
       const isVuln = e.buffs.some(b => b.type === 'vulnerable')
       let dmg = calcDamage(fx.damage, p.shaqi, p.buffs, p.isMad)
+      
+      // 幻象双倍
+      if (illusionMultiplier > 1) {
+        dmg *= illusionMultiplier
+      }
       
       // 道心加伤
       if (fx.damagePerDaoxin) {
@@ -467,15 +495,30 @@ export const useGameStore = create<GameState>()(
         const newShaqi = Math.min(p.maxShaqi, p.shaqi + fx.shaqiGain)
         p.shaqi = newShaqi
         log(`🔥 煞气 → ${newShaqi}`)
+        // 检查最高煞气成就
+        useMetaStore.getState().checkAchievements({ type: 'shaqi_reached', value: newShaqi })
       }
     }
 
     // 护甲
     let blockValue = fx.block || 0
     
+    // 幻象双倍护甲
+    if (illusionMultiplier > 1 && blockValue > 0) {
+      blockValue *= illusionMultiplier
+    }
+    
+    // 幻象无效果时护甲为0
+    if (illusionNoEffect) {
+      blockValue = 0
+    }
+    
     // 护甲 = 煞气值
-    if (fx.blockFromShaqi) {
+    if (fx.blockFromShaqi && !illusionNoEffect) {
       blockValue = p.shaqi
+      if (illusionMultiplier > 1) {
+        blockValue *= illusionMultiplier
+      }
       log(`🔮 煞气护甲：${blockValue}`)
     }
     
@@ -494,6 +537,8 @@ export const useGameStore = create<GameState>()(
       if (fx.shaqiGain) {
         const newShaqi = Math.min(p.maxShaqi, p.shaqi + fx.shaqiGain)
         p.shaqi = newShaqi
+        // 检查最高煞气成就
+        useMetaStore.getState().checkAchievements({ type: 'shaqi_reached', value: newShaqi })
       }
     }
 
@@ -565,6 +610,8 @@ export const useGameStore = create<GameState>()(
       log(`🔥🔥🔥 走火入魔！所有伤害 ×3！`)
       // 入魔音效
       playSound('madness')
+      // 触发入魔成就
+      useMetaStore.getState().checkAchievements({ type: 'madness' })
     }
 
     // 驱魔符 - 进入选择模式，揭示一张牌的真伪
@@ -615,6 +662,17 @@ export const useGameStore = create<GameState>()(
       // 获得金币奖励
       p.gold += s.goldReward
       log(`💰 获得 ${s.goldReward} 金币（共 ${p.gold}）`)
+      
+      // 元游戏系统：击杀统计和成就
+      const metaStore = useMetaStore.getState()
+      metaStore.checkAchievements({ type: 'gold_earned', value: s.goldReward })
+      if (e.def.type === 'elite') {
+        metaStore.checkAchievements({ type: 'elite_kill' })
+      } else if (e.def.type === 'boss') {
+        metaStore.checkAchievements({ type: 'boss_kill' })
+      } else {
+        metaStore.checkAchievements({ type: 'kill' })
+      }
 
       // 根据当前层数选择奖励卡池
       const currentLayer = s.map?.nodes.find(n => n.id === s.selectedNodeId)?.layer ?? 1
