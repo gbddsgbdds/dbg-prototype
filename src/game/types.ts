@@ -3,7 +3,7 @@ export type CardType = 'attack' | 'skill' | 'power'
 export type CardClass = 'warrior' | 'puppet' | 'sorcerer' | 'firecraft'
 export type CardRarity = 'starter' | 'common' | 'uncommon' | 'rare' | 'legendary'
 export type EnemyType = 'normal' | 'elite' | 'boss'
-export type GamePhase = 'player_turn' | 'enemy_turn' | 'game_over' | 'victory' | 'madness' | 'map' | 'shop' | 'event' | 'character_select'
+export type GamePhase = 'title' | 'player_turn' | 'enemy_turn' | 'game_over' | 'victory' | 'madness' | 'map' | 'shop' | 'event' | 'character_select'
 export type IntentType = 'attack' | 'defend' | 'buff' | 'debuff' | 'transform' | 'steal' | 'heal'
 
 // 地图节点类型

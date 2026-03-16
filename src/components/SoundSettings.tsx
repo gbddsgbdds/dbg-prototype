@@ -1,14 +1,17 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { soundManager } from '../utils/soundManager'
+import { soundManager, bgmManager } from '../utils/soundManager'
+import type { BGMScene } from '../utils/soundManager'
 import './SoundSettings.css'
 
 // 音效设置的持久化 key
 const SOUND_SETTINGS_KEY = 'dbg-sound-settings'
 
 interface SoundSettingsData {
-  enabled: boolean
-  volume: number
+  soundEnabled: boolean
+  soundVolume: number
+  bgmEnabled: boolean
+  bgmVolume: number
 }
 
 // 获取保存的设置
@@ -19,7 +22,7 @@ function getSavedSettings(): SoundSettingsData {
       return JSON.parse(data)
     }
   } catch {}
-  return { enabled: true, volume: 30 }
+  return { soundEnabled: true, soundVolume: 30, bgmEnabled: true, bgmVolume: 15 }
 }
 
 // 保存设置
@@ -34,24 +37,36 @@ interface SoundSettingsProps {
 }
 
 export function SoundSettings({ onClose }: SoundSettingsProps) {
-  const [enabled, setEnabled] = useState(soundManager.isEnabled())
-  const [volume, setVolume] = useState(Math.round(soundManager.getVolume() * 100))
+  const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled())
+  const [soundVolume, setSoundVolume] = useState(Math.round(soundManager.getVolume() * 100))
+  const [bgmEnabled, setBgmEnabled] = useState(bgmManager.isEnabled())
+  const [bgmVolume, setBgmVolume] = useState(Math.round(bgmManager.getVolume() * 100))
 
   // 从 localStorage 恢复设置
   useEffect(() => {
     const saved = getSavedSettings()
-    setEnabled(saved.enabled)
-    setVolume(Math.round(saved.volume * 100))
-    soundManager.toggle(saved.enabled)
-    soundManager.setVolume(saved.volume)
+    setSoundEnabled(saved.soundEnabled)
+    setSoundVolume(Math.round(saved.soundVolume * 100))
+    setBgmEnabled(saved.bgmEnabled)
+    setBgmVolume(Math.round(saved.bgmVolume * 100))
+    
+    soundManager.toggle(saved.soundEnabled)
+    soundManager.setVolume(saved.soundVolume)
+    bgmManager.toggle(saved.bgmEnabled)
+    bgmManager.setVolume(saved.bgmVolume)
   }, [])
 
-  // 处理开关
-  const handleToggle = () => {
-    const newState = !enabled
-    setEnabled(newState)
+  // 处理音效开关
+  const handleSoundToggle = () => {
+    const newState = !soundEnabled
+    setSoundEnabled(newState)
     soundManager.toggle(newState)
-    saveSettings({ enabled: newState, volume: volume / 100 })
+    saveSettings({ 
+      soundEnabled: newState, 
+      soundVolume: soundVolume / 100, 
+      bgmEnabled, 
+      bgmVolume: bgmVolume / 100 
+    })
     
     // 播放测试音
     if (newState) {
@@ -59,12 +74,48 @@ export function SoundSettings({ onClose }: SoundSettingsProps) {
     }
   }
 
-  // 处理音量变化
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // 处理音效音量变化
+  const handleSoundVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseInt(e.target.value)
-    setVolume(newVolume)
+    setSoundVolume(newVolume)
     soundManager.setVolume(newVolume / 100)
-    saveSettings({ enabled, volume: newVolume / 100 })
+    saveSettings({ 
+      soundEnabled, 
+      soundVolume: newVolume / 100, 
+      bgmEnabled, 
+      bgmVolume: bgmVolume / 100 
+    })
+  }
+
+  // 处理BGM开关
+  const handleBgmToggle = () => {
+    const newState = !bgmEnabled
+    setBgmEnabled(newState)
+    bgmManager.toggle(newState)
+    saveSettings({ 
+      soundEnabled, 
+      soundVolume: soundVolume / 100, 
+      bgmEnabled: newState, 
+      bgmVolume: bgmVolume / 100 
+    })
+    
+    // 如果开启，播放菜单音乐作为测试
+    if (newState) {
+      bgmManager.play('menu' as BGMScene)
+    }
+  }
+
+  // 处理BGM音量变化
+  const handleBgmVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newVolume = parseInt(e.target.value)
+    setBgmVolume(newVolume)
+    bgmManager.setVolume(newVolume / 100)
+    saveSettings({ 
+      soundEnabled, 
+      soundVolume: soundVolume / 100, 
+      bgmEnabled, 
+      bgmVolume: newVolume / 100 
+    })
   }
 
   // 测试音效
@@ -93,49 +144,87 @@ export function SoundSettings({ onClose }: SoundSettingsProps) {
         </div>
 
         <div className="sound-settings-content">
-          {/* 音效开关 */}
-          <div className="setting-row">
-            <span className="setting-label">音效</span>
-            <button 
-              className={`toggle-btn ${enabled ? 'on' : 'off'}`}
-              onClick={handleToggle}
-            >
-              {enabled ? '开启' : '关闭'}
-            </button>
-          </div>
+          {/* 分隔：音效 */}
+          <div className="setting-section">
+            <div className="section-title">🎵 音效</div>
+            
+            {/* 音效开关 */}
+            <div className="setting-row">
+              <span className="setting-label">音效</span>
+              <button 
+                className={`toggle-btn ${soundEnabled ? 'on' : 'off'}`}
+                onClick={handleSoundToggle}
+              >
+                {soundEnabled ? '开启' : '关闭'}
+              </button>
+            </div>
 
-          {/* 音量滑块 */}
-          <div className="setting-row volume-row">
-            <span className="setting-label">音量</span>
-            <div className="volume-control">
-              <input
-                type="range"
-                min="0"
-                max="100"
-                value={volume}
-                onChange={handleVolumeChange}
-                className="volume-slider"
-                disabled={!enabled}
-              />
-              <span className="volume-value">{volume}%</span>
+            {/* 音效音量滑块 */}
+            <div className="setting-row volume-row">
+              <span className="setting-label">音效音量</span>
+              <div className="volume-control">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={soundVolume}
+                  onChange={handleSoundVolumeChange}
+                  className="volume-slider"
+                  disabled={!soundEnabled}
+                />
+                <span className="volume-value">{soundVolume}%</span>
+              </div>
+            </div>
+
+            {/* 测试按钮 */}
+            <div className="setting-row">
+              <span className="setting-label">测试音效</span>
+              <button 
+                className="test-btn"
+                onClick={handleTestSound}
+                disabled={!soundEnabled}
+              >
+                🔔 播放
+              </button>
             </div>
           </div>
 
-          {/* 测试按钮 */}
-          <div className="setting-row">
-            <span className="setting-label">测试</span>
-            <button 
-              className="test-btn"
-              onClick={handleTestSound}
-              disabled={!enabled}
-            >
-              🔔 播放测试音
-            </button>
+          {/* 分隔：背景音乐 */}
+          <div className="setting-section">
+            <div className="section-title">🎶 背景音乐</div>
+            
+            {/* BGM开关 */}
+            <div className="setting-row">
+              <span className="setting-label">背景音乐</span>
+              <button 
+                className={`toggle-btn ${bgmEnabled ? 'on' : 'off'}`}
+                onClick={handleBgmToggle}
+              >
+                {bgmEnabled ? '开启' : '关闭'}
+              </button>
+            </div>
+
+            {/* BGM音量滑块 */}
+            <div className="setting-row volume-row">
+              <span className="setting-label">音乐音量</span>
+              <div className="volume-control">
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  value={bgmVolume}
+                  onChange={handleBgmVolumeChange}
+                  className="volume-slider"
+                  disabled={!bgmEnabled}
+                />
+                <span className="volume-value">{bgmVolume}%</span>
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="sound-settings-footer">
-          <p className="hint">💡 音效使用 Web Audio API 合成</p>
+          <p className="hint">💡 音效和音乐使用 Web Audio API 合成</p>
         </div>
       </motion.div>
     </motion.div>

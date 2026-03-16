@@ -279,7 +279,7 @@ function drawCards(drawPile: CardDef[], discardPile: CardDef[], count: number): 
 export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
-      phase: 'character_select',
+      phase: 'title',
       turn: 1,
       player: mkPlayer(),
       characterId: CHARACTER_XINSU.id,

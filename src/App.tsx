@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect, Suspense, lazy } from 'react'
+import { useState, useEffect, Suspense, lazy, useRef } from 'react'
 import { useGameStore, hasSaveData } from './game/store'
 import { useMetaStore } from './game/meta'
 import { Hand } from './components/Hand'
@@ -8,6 +8,8 @@ import { PlayerStatus } from './components/PlayerStatus'
 import { BattleLog } from './components/BattleLog'
 import { EnemyDamageFloat, PlayerDamageFloat } from './components/DamageFloat'
 import { SoundSettings } from './components/SoundSettings'
+import { bgmManager } from './utils/soundManager'
+import type { BGMScene } from './utils/soundManager'
 import './App.css'
 
 // 懒加载非首屏组件
@@ -104,15 +106,86 @@ function App() {
   const phase = useGameStore(s => s.phase)
   const player = useGameStore(s => s.player)
   const map = useGameStore(s => s.map)
+  const enemy = useGameStore(s => s.enemy)
   const bossPhaseChange = useGameStore(s => s.bossPhaseChange)
   const newGame = useGameStore(s => s.newGame)
   const clearSave = useGameStore(s => s.clearSave)
   const [hasSave, setHasSave] = useState(false)
+  
+  // 开始界面状态 - 移到顶层避免 hooks 规则问题
+  const [showAchievements, setShowAchievements] = useState(false)
+  const [showSoundSettings, setShowSoundSettings] = useState(false)
+  const achievements = useMetaStore(s => s.achievements)
+  const unlockedCount = achievements.filter(a => a.unlocked).length
+  
+  // BGM 状态跟踪
+  const currentBgmRef = useRef<BGMScene | null>(null)
+  const userInteractedRef = useRef(false)
 
   // 检查存档
   useEffect(() => {
     setHasSave(hasSaveData())
   }, [map])
+
+  // BGM 场景切换逻辑
+  useEffect(() => {
+    // 确定当前场景应该播放的BGM
+    let targetScene: BGMScene | null = null
+    
+    if (!map) {
+      // 开始界面或角色选择 - 菜单音乐
+      targetScene = 'menu'
+    } else if (phase === 'player_turn' || phase === 'enemy_turn') {
+      // 战斗中 - 根据敌人类型选择
+      if (enemy && enemy.def.type === 'boss') {
+        targetScene = 'boss'
+      } else {
+        targetScene = 'battle'
+      }
+    } else if (phase === 'map') {
+      // 地图界面 - 暂停BGM（让MapScreen自己处理篝火）
+      if (currentBgmRef.current && currentBgmRef.current !== 'menu') {
+        bgmManager.stop()
+        currentBgmRef.current = null
+      }
+      return
+    } else if (phase === 'shop' || phase === 'event') {
+      // 商店/事件 - 使用休息音乐
+      targetScene = 'rest'
+    }
+    
+    // 切换BGM
+    if (targetScene && targetScene !== currentBgmRef.current) {
+      // 用户首次交互后才播放BGM
+      if (!userInteractedRef.current) {
+        const handleFirstInteraction = () => {
+          userInteractedRef.current = true
+          if (bgmManager.isEnabled()) {
+            bgmManager.play(targetScene!)
+            currentBgmRef.current = targetScene
+          }
+          document.removeEventListener('click', handleFirstInteraction)
+          document.removeEventListener('keydown', handleFirstInteraction)
+        }
+        document.addEventListener('click', handleFirstInteraction)
+        document.addEventListener('keydown', handleFirstInteraction)
+      } else {
+        bgmManager.play(targetScene)
+        currentBgmRef.current = targetScene
+      }
+    }
+  }, [phase, map, enemy])
+
+  // 游戏结束时停止BGM
+  useEffect(() => {
+    if (phase === 'game_over' || phase === 'victory') {
+      // 不立即停止，让胜利/失败音效先播放
+      setTimeout(() => {
+        bgmManager.stop()
+        currentBgmRef.current = null
+      }, 2000)
+    }
+  }, [phase])
 
   // 开始新游戏（进入角色选择）
   const handleNewGame = () => {
@@ -137,12 +210,6 @@ function App() {
 
   // 开始界面
   if (!map) {
-    // 成就界面状态
-    const [showAchievements, setShowAchievements] = useState(false)
-    const [showSoundSettings, setShowSoundSettings] = useState(false)
-    const achievements = useMetaStore(s => s.achievements)
-    const unlockedCount = achievements.filter(a => a.unlocked).length
-    
     return (
       <>
         {/* 成就弹窗 */}
@@ -247,7 +314,7 @@ function App() {
             <Suspense fallback={<span>...</span>}>
               <Changelog />
             </Suspense>
-            <span className="version-tag">v0.5.5</span>
+            <span className="version-tag">v0.5.8</span>
           </div>
         </div>
       </>
