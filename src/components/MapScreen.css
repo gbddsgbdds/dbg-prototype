@@ -355,3 +355,82 @@
     bottom: 5rem;  /* 给底部状态栏留空间 */
   }
 }
+
+/* === 触控设备地图优化 === */
+@media (hover: none) and (pointer: coarse) {
+  /* 地图节点触控区域增大 */
+  .map-node {
+    min-width: 60px;
+    min-height: 60px;
+  }
+  
+  .map-node.boss {
+    min-width: 75px;
+    min-height: 75px;
+  }
+  
+  /* 可到达节点明显指示 */
+  .map-node.reachable {
+    border-width: 3px;
+    border-color: #d29922;
+    box-shadow: 0 0 25px rgba(210, 153, 34, 0.5);
+  }
+  
+  /* 触控激活状态 */
+  .map-node:active {
+    transform: scale(0.95);
+    transition: transform 0.1s;
+  }
+  
+  .map-node.reachable:active,
+  .map-node.selected:active {
+    transform: scale(0.95);
+  }
+  
+  /* 移除hover效果 */
+  .map-node:hover {
+    transform: none;
+  }
+  
+  .map-node.reachable:hover {
+    transform: none;
+    box-shadow: 0 0 25px rgba(210, 153, 34, 0.5);
+  }
+  
+  /* 进入按钮触控优化 */
+  .enter-btn {
+    min-height: 48px;
+    min-width: 150px;
+    padding: 0.8rem 2rem;
+  }
+  
+  .enter-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 0 30px rgba(248, 81, 73, 0.6);
+  }
+  
+  /* 地图容器滚动优化 */
+  .map-container {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* 触控设备小屏幕 */
+  @media (max-width: 400px) {
+    .map-node {
+      min-width: 52px;
+      min-height: 52px;
+    }
+    
+    .map-node.boss {
+      min-width: 65px;
+      min-height: 65px;
+    }
+    
+    .enter-btn {
+      min-height: 44px;
+      min-width: 130px;
+      padding: 0.6rem 1.5rem;
+    }
+  }
+}

@@ -12,6 +12,8 @@ import { DeckViewer } from './components/DeckViewer'
 import { MapScreen } from './components/MapScreen'
 import { ShopScreen } from './components/ShopScreen'
 import { EventScreen } from './components/EventScreen'
+import { CharacterSelect } from './components/CharacterSelect'
+import { EnemyDamageFloat, PlayerDamageFloat } from './components/DamageFloat'
 import './App.css'
 
 // Boss阶段切换提示组件
@@ -46,6 +48,37 @@ function BossPhaseAlert() {
   )
 }
 
+// 入魔氛围层组件
+function MadnessOverlay() {
+  const isMad = useGameStore(s => s.player.isMad)
+  
+  return (
+    <AnimatePresence>
+      {isMad && (
+        <motion.div
+          className="madness-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <div className="madness-lines" />
+          <motion.div 
+            className="madness-center-text"
+            animate={{ 
+              scale: [1, 1.1, 1],
+              opacity: [0.8, 1, 0.8]
+            }}
+            transition={{ duration: 1, repeat: Infinity }}
+          >
+            🔥 入魔中 🔥
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
 function App() {
   const phase = useGameStore(s => s.phase)
   const player = useGameStore(s => s.player)
@@ -53,6 +86,7 @@ function App() {
   const bossPhaseChange = useGameStore(s => s.bossPhaseChange)
   const newGame = useGameStore(s => s.newGame)
   const clearSave = useGameStore(s => s.clearSave)
+  const selectCharacter = useGameStore(s => s.selectCharacter)
   const [hasSave, setHasSave] = useState(false)
 
   // 检查存档
@@ -60,10 +94,21 @@ function App() {
     setHasSave(hasSaveData())
   }, [map])
 
-  // 开始新游戏（清除旧存档）
+  // 开始新游戏（进入角色选择）
   const handleNewGame = () => {
     clearSave()
-    newGame()
+    // 设置阶段为角色选择
+    useGameStore.setState({ phase: 'character_select', map: null })
+  }
+
+  // 继续游戏（使用存档中的角色）
+  const handleContinue = () => {
+    newGame()  // 这会从存档恢复
+  }
+
+  // 角色选择界面
+  if (phase === 'character_select' && !map) {
+    return <CharacterSelect />
   }
 
   // 开始界面
@@ -85,7 +130,7 @@ function App() {
           {hasSave && (
             <motion.button
               className="start-btn continue"
-              onClick={newGame}
+              onClick={handleContinue}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               initial={{ opacity: 0, y: 20 }}
@@ -110,7 +155,7 @@ function App() {
 
         <div className="start-footer">
           <Changelog />
-          <span className="version-tag">v0.3.0</span>
+          <span className="version-tag">v0.5.0</span>
         </div>
       </div>
     )
@@ -164,13 +209,20 @@ function App() {
       <div className="top-bar">
         <DeckViewer />
       </div>
-      <Enemy />
-      <PlayerStatus />
+      <div className="battle-area">
+        <Enemy />
+        <EnemyDamageFloat />
+      </div>
+      <div className="player-area">
+        <PlayerStatus />
+        <PlayerDamageFloat />
+      </div>
       <BattleLog />
       <Hand />
       {phase === 'victory' && <VictoryScreen />}
       {phase === 'game_over' && <GameOverScreen />}
       <BossPhaseAlert />
+      <MadnessOverlay />
     </div>
   )
 }

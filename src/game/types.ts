@@ -3,7 +3,7 @@ export type CardType = 'attack' | 'skill' | 'power'
 export type CardClass = 'warrior' | 'puppet' | 'sorcerer' | 'firecraft'
 export type CardRarity = 'starter' | 'common' | 'uncommon' | 'rare' | 'legendary'
 export type EnemyType = 'normal' | 'elite' | 'boss'
-export type GamePhase = 'player_turn' | 'enemy_turn' | 'game_over' | 'victory' | 'madness' | 'map' | 'shop' | 'event'
+export type GamePhase = 'player_turn' | 'enemy_turn' | 'game_over' | 'victory' | 'madness' | 'map' | 'shop' | 'event' | 'character_select'
 export type IntentType = 'attack' | 'defend' | 'buff' | 'debuff' | 'transform' | 'steal' | 'heal'
 
 // 地图节点类型
@@ -57,6 +57,24 @@ export interface GameMap {
   bossNodeId: string   // Boss节点ID
 }
 
+// 条件类型
+export type ConditionType = 
+  | 'shaqi_gte'        // 煞气 >= 值
+  | 'san_lte'          // 理智 <= 值
+  | 'enemy_hp_pct_lte' // 敌人HP百分比 <= 值 (0-100)
+
+export interface ConditionEffect {
+  condition: {
+    type: ConditionType
+    value: number
+  }
+  // 条件满足时的额外效果
+  bonusBlock?: number
+  bonusDraw?: number
+  bonusSanCost?: number
+  damageMultiplier?: number  // 伤害倍率
+}
+
 export interface CardEffect {
   damage?: number
   block?: number
@@ -68,6 +86,11 @@ export interface CardEffect {
   sanCost?: number      // 消耗理智
   hpCost?: number       // 消耗 HP
   upgradable?: boolean   // 是否可升级（商店升级）
+  // 动态效果
+  blockFromShaqi?: boolean    // 护甲 = 当前煞气值
+  damagePerDaoxin?: number    // 每层道心额外伤害
+  // 条件效果
+  conditional?: ConditionEffect
 }
 
 export interface BuffEffect {
@@ -138,4 +161,26 @@ export interface EnemyState {
   block: number
   buffs: BuffEffect[]
   intent: EnemyIntent
+}
+
+// 伤害飘字数据
+export interface DamageFloatItem {
+  id: string
+  value: number
+  type: 'damage' | 'heal' | 'block' | 'san' | 'special'
+  target: 'player' | 'enemy'
+}
+
+// 角色定义
+export interface CharacterDef {
+  id: string
+  name: string
+  title: string           // 称号/描述
+  maxHp: number
+  maxSan: number
+  maxShaqi: number
+  maxEnergy: number
+  startingDeck: string[]  // 初始卡牌ID列表
+  icon?: string
+  description?: string    // 详细描述
 }

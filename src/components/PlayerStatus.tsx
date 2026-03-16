@@ -26,19 +26,19 @@ export function PlayerStatus() {
         {/* HP */}
         <div className="hp-bar player-hp">
           <div className={`hp-fill player-hp-fill ${lowHp ? 'low-hp' : ''}`} style={{ width: `${hpPct}%` }} />
-          <span className="hp-text">❤️ {player.hp} / {player.maxHp}</span>
+          <span className={`hp-text ${player.isMad ? 'madness-text' : ''}`}>❤️ {player.hp} / {player.maxHp}</span>
         </div>
 
         {/* 理智 */}
         <div className="san-bar">
           <div className={`san-fill ${lowSan ? 'low-san' : ''}`} style={{ width: `${sanPct}%` }} />
-          <span className="san-text">🧠 {player.san} / {player.maxSan}</span>
+          <span className={`san-text ${player.isMad ? 'madness-text' : ''}`}>🧠 {player.san} / {player.maxSan}</span>
         </div>
 
         {/* 煞性 */}
         <div className="shaqi-bar">
           <div className={`shaqi-fill ${player.isMad ? 'mad' : ''}`} style={{ width: `${shaqiPct}%` }} />
-          <span className="shaqi-text">🔥 煞性 {player.shaqi} [{shaqiStage}]</span>
+          <span className={`shaqi-text ${player.isMad ? 'madness-text' : ''}`}>🔥 煞性 {player.shaqi} [{shaqiStage}]</span>
         </div>
 
         {/* 能量 */}

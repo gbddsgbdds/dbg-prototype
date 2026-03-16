@@ -92,13 +92,206 @@ body {
   gap: 0.4rem;
 }
 
-/* 入魔屏幕效果 */
+/* 入魔屏幕效果 - 增强版 */
 .madness-screen {
   animation: madnessPulse 0.8s infinite;
+  position: relative;
 }
+
+/* 入魔屏幕扭曲 */
+.madness-screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(139, 0, 0, 0.4) 100%);
+  animation: madnessVignette 1.2s ease-in-out infinite;
+}
+
+/* 入魔边缘暗角 + 红光 */
+.madness-screen::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  box-shadow: inset 0 0 150px 50px rgba(139, 0, 0, 0.3);
+  animation: madnessEdgePulse 0.6s ease-in-out infinite alternate;
+}
+
 @keyframes madnessPulse {
-  0%, 100% { background-color: var(--bg); }
-  50% { background-color: #1a0000; box-shadow: inset 0 0 80px rgba(255,0,0,0.15); }
+  0%, 100% { 
+    background-color: var(--bg); 
+    filter: hue-rotate(0deg) saturate(1);
+  }
+  50% { 
+    background-color: #1a0505; 
+    box-shadow: inset 0 0 80px rgba(255,0,0,0.15); 
+    filter: hue-rotate(-5deg) saturate(1.2);
+  }
+}
+
+@keyframes madnessVignette {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.9; }
+}
+
+@keyframes madnessEdgePulse {
+  0% { box-shadow: inset 0 0 100px 30px rgba(139, 0, 0, 0.25); }
+  100% { box-shadow: inset 0 0 180px 60px rgba(139, 0, 0, 0.45); }
+}
+
+/* 入魔文字抖动效果 */
+.madness-text {
+  animation: textShake 0.15s ease-in-out infinite;
+  display: inline-block;
+}
+
+@keyframes textShake {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  20% { transform: translate(-1.5px, 0.5px) rotate(-0.5deg); }
+  40% { transform: translate(1px, -0.5px) rotate(0.5deg); }
+  60% { transform: translate(-0.5px, 1px) rotate(-0.3deg); }
+  80% { transform: translate(0.5px, -0.5px) rotate(0.3deg); }
+}
+
+/* 入魔 HP 条抖动 */
+.madness-screen .player-hp-fill {
+  animation: madnessBarShake 0.2s ease-in-out infinite, pulse 0.5s infinite;
+}
+
+@keyframes madnessBarShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+/* 入魔理智条抖动 */
+.madness-screen .san-fill {
+  animation: madnessBarShake 0.25s ease-in-out infinite;
+}
+
+/* 入魔卡牌微颤 */
+.madness-screen .card {
+  animation: cardShiver 0.3s ease-in-out infinite;
+}
+
+@keyframes cardShiver {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  33% { transform: translateY(-2px) rotate(0.3deg); }
+  66% { transform: translateY(1px) rotate(-0.3deg); }
+}
+
+/* 入魔敌人图像抖动增强 */
+.madness-screen .enemy img {
+  animation: enemyImageDistort 0.1s ease-in-out infinite;
+}
+
+@keyframes enemyImageDistort {
+  0%, 100% { transform: translate(0, 0) scale(1); filter: brightness(1); }
+  25% { transform: translate(-3px, 2px) scale(1.02); filter: brightness(1.1); }
+  50% { transform: translate(2px, -1px) scale(0.98); filter: brightness(0.95); }
+  75% { transform: translate(-1px, -2px) scale(1.01); filter: brightness(1.05); }
+}
+
+/* 入魔能量球闪烁 */
+.madness-screen .energy-orb.active {
+  animation: energyOrbFlicker 0.2s ease-in-out infinite;
+  text-shadow: 0 0 10px #ff6600, 0 0 20px #ff0000;
+}
+
+@keyframes energyOrbFlicker {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.1); }
+}
+
+/* 入魔结束回合按钮效果 */
+.madness-screen .end-turn-btn {
+  animation: madnessBtnPulse 0.4s ease-in-out infinite;
+}
+
+@keyframes madnessBtnPulse {
+  0%, 100% { 
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+    border-color: var(--red);
+  }
+  50% { 
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.8);
+    border-color: #ff6600;
+  }
+}
+
+/* 入魔时敌人意图抖动 */
+.madness-screen .enemy-intent {
+  animation: intentShake 0.1s ease-in-out infinite;
+  color: var(--red) !important;
+}
+
+@keyframes intentShake {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(3px); }
+}
+
+/* 入魔氛围层 */
+.madness-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  z-index: 998;
+  overflow: hidden;
+}
+
+/* 入魔闪烁线条 */
+.madness-lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 50px,
+    rgba(255, 0, 0, 0.03) 50px,
+    rgba(255, 0, 0, 0.03) 51px
+  );
+  animation: madnessLinesMove 2s linear infinite;
+}
+
+@keyframes madnessLinesMove {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(51px); }
+}
+
+/* 入魔中心提示文字 */
+.madness-center-text {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  font-weight: bold;
+  color: rgba(255, 0, 0, 0.15);
+  text-shadow: 0 0 30px rgba(255, 0, 0, 0.3);
+  letter-spacing: 0.5em;
+  white-space: nowrap;
+}
+
+/* 入魔战斗日志效果 */
+.madness-screen .battle-log {
+  border-color: rgba(139, 0, 0, 0.5);
+  box-shadow: inset 0 0 20px rgba(139, 0, 0, 0.1);
+}
+
+/* 入魔敌人区域效果 */
+.madness-screen .enemy-area {
+  animation: enemyAreaGlow 0.5s ease-in-out infinite alternate;
+}
+
+@keyframes enemyAreaGlow {
+  0% { filter: drop-shadow(0 0 5px rgba(255, 0, 0, 0.3)); }
+  100% { filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.6)); }
 }
 
 /* === 敌人区域 === */
@@ -1067,6 +1260,367 @@ body {
   
   .status-value {
     font-size: 0.8rem;
+  }
+}
+
+/* === 伤害飘字 === */
+.damage-float-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.damage-float {
+  position: absolute;
+  font-size: 1.8rem;
+  font-weight: bold;
+  text-shadow: 
+    0 0 10px currentColor,
+    2px 2px 4px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+/* 敌人飘字位置 - 在敌人上方 */
+.enemy-damage-float-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 120px;
+  height: 60px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.damage-float.enemy-float {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 玩家飘字位置 - 在玩家状态区域 */
+.player-damage-float-container {
+  position: absolute;
+  top: 30%;
+  right: 10%;
+  width: 100px;
+  height: 50px;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.damage-float.player-float {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* 飘字颜色 */
+.damage-float.damage {
+  color: #ff4444;
+}
+
+.damage-float.heal {
+  color: #44ff44;
+}
+
+.damage-float.block {
+  color: #44aaff;
+  font-size: 1.4rem;
+}
+
+.damage-float.san {
+  color: #aa44ff;
+  font-size: 1.5rem;
+}
+
+.damage-float.special {
+  color: #ffaa00;
+  font-size: 2rem;
+}
+
+/* 入魔时飘字特效 */
+.madness-screen .damage-float.damage {
+  color: #ff0000;
+  text-shadow: 
+    0 0 20px #ff0000,
+    0 0 40px #ff0000,
+    2px 2px 4px rgba(0, 0, 0, 0.8);
+  animation: madnessFloatShake 0.1s ease-in-out infinite;
+}
+
+@keyframes madnessFloatShake {
+  0%, 100% { transform: translateX(-50%) rotate(0deg); }
+  25% { transform: translateX(-50%) rotate(-2deg); }
+  75% { transform: translateX(-50%) rotate(2deg); }
+}
+
+/* 飘字数值 */
+.float-value {
+  display: inline-block;
+  min-width: 30px;
+  text-align: center;
+}
+
+/* 战斗区域布局调整 */
+.battle-area {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.player-area {
+  position: relative;
+  display: flex;
+  justify-content: center;
+}
+
+/* 移动端飘字适配 */
+@media (max-width: 500px) {
+  .damage-float {
+    font-size: 1.4rem;
+  }
+  
+  .damage-float.block {
+    font-size: 1.2rem;
+  }
+  
+  .damage-float.san {
+    font-size: 1.3rem;
+  }
+  
+  .enemy-damage-float-container {
+    width: 80px;
+    height: 40px;
+  }
+  
+  .player-damage-float-container {
+    width: 70px;
+    height: 35px;
+    right: 5%;
+  }
+}
+
+/* === 触控设备优化 === */
+/* 触控设备上没有hover效果，需要提供明显的可交互状态 */
+
+@media (hover: none) and (pointer: coarse) {
+  /* 卡牌触控优化 */
+  .card.playable {
+    border-width: 3px;
+    border-color: #58a6ff;
+    box-shadow: 0 0 20px rgba(88, 166, 255, 0.4), inset 0 0 10px rgba(88, 166, 255, 0.1);
+    transform: translateY(-5px);
+  }
+  
+  /* 可打出卡牌添加闪烁边框动画 */
+  .card.playable::before {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 14px;
+    border: 2px solid #58a6ff;
+    animation: touchablePulse 1.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes touchablePulse {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 0.8; transform: scale(1.02); }
+  }
+  
+  /* 不可打出的卡牌 */
+  .card.disabled {
+    opacity: 0.4;
+    filter: grayscale(0.5);
+  }
+  
+  /* 按钮触控区域增大 */
+  .start-btn, .end-turn-btn, .deck-btn, .close-btn {
+    min-height: 48px;
+    min-width: 48px;
+  }
+  
+  /* 手牌区域触控优化 */
+  .hand-area {
+    gap: 0.6rem;
+    padding: 0.8rem;
+    padding-bottom: 1rem;
+  }
+  
+  /* 入魔状态下卡牌触控优化 */
+  .madness-screen .card.playable {
+    border-color: #ff0000;
+    box-shadow: 0 0 25px rgba(255, 0, 0, 0.5), inset 0 0 15px rgba(255, 0, 0, 0.15);
+  }
+  
+  .madness-screen .card.playable::before {
+    border-color: #ff0000;
+    animation: touchableMadPulse 0.8s ease-in-out infinite;
+  }
+  
+  @keyframes touchableMadPulse {
+    0%, 100% { opacity: 0.4; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.03); }
+  }
+  
+  /* 驱魔符选择模式触控优化 */
+  .card.exorcism-target {
+    border-width: 3px;
+    border-color: #9b59b6;
+    box-shadow: 0 0 20px rgba(155, 89, 182, 0.4);
+    transform: translateY(-5px);
+  }
+  
+  .card.exorcism-target::before {
+    border-color: #9b59b6;
+    animation: touchablePulse 1.5s ease-in-out infinite;
+  }
+  
+  /* 触控设备上移除hover效果（避免卡牌卡在hover状态） */
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .card.playable:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 20px rgba(88, 166, 255, 0.4);
+  }
+  
+  /* 触控激活状态 */
+  .card:active {
+    transform: scale(0.95) translateY(-2px);
+    transition: transform 0.1s;
+  }
+  
+  .card.playable:active {
+    transform: scale(0.95) translateY(-3px);
+  }
+  
+  /* 战斗日志触控优化 */
+  .battle-log {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  /* 牌组面板触控优化 */
+  .deck-cards {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  
+  .deck-card-item {
+    min-height: 48px;
+    padding: 0.6rem;
+  }
+  
+  .deck-tabs button {
+    min-height: 44px;
+    min-width: 60px;
+  }
+  
+  /* 覆盖层触控优化 */
+  .overlay {
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .victory-panel, .gameover-panel {
+    max-width: 90vw;
+    padding: 1.5rem;
+  }
+  
+  .victory-panel button, .gameover-panel button {
+    min-height: 48px;
+    min-width: 120px;
+  }
+  
+  /* 奖励卡牌触控优化 */
+  .reward-card {
+    min-width: 100px;
+    min-height: 140px;
+  }
+  
+  .reward-card:active {
+    transform: scale(0.95);
+  }
+}
+
+/* === 触控设备小屏幕额外优化 === */
+@media (hover: none) and (pointer: coarse) and (max-width: 400px) {
+  /* 卡牌触控友好尺寸 */
+  .card {
+    width: 90px;
+    min-height: 135px;
+  }
+  
+  .card-image {
+    width: 75px;
+    height: 55px;
+  }
+  
+  /* 手牌区域更紧凑但触控友好 */
+  .hand-area {
+    gap: 0.4rem;
+    padding: 0.5rem;
+    padding-bottom: 0.8rem;
+    min-height: 160px;
+  }
+  
+  /* 状态栏触控优化 */
+  .player-status {
+    padding: 0.4rem 0.5rem;
+  }
+  
+  .end-turn-btn {
+    min-height: 44px;
+    padding: 0.4rem 0.8rem;
+  }
+  
+  /* HP/理智条触控友好 */
+  .hp-bar {
+    min-height: 20px;
+    width: 110px;
+  }
+  
+  .san-bar {
+    min-height: 14px;
+    width: 95px;
+  }
+  
+  .shaqi-bar {
+    min-height: 16px;
+    width: 105px;
+  }
+  
+  /* 敌人区域 */
+  .enemy img {
+    width: 95px;
+    height: 95px;
+  }
+  
+  /* 按钮触控友好 */
+  .deck-btn {
+    min-height: 44px;
+    padding: 0.4rem 0.8rem;
+  }
+}
+
+/* === 防止双击缩放 === */
+@media (hover: none) and (pointer: coarse) {
+  * {
+    touch-action: manipulation;
+  }
+  
+  /* 保持滚动区域的正常滚动 */
+  .battle-log, .deck-cards, .map-container {
+    touch-action: pan-y;
   }
 }
 

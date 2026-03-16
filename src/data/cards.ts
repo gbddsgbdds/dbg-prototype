@@ -96,7 +96,7 @@ const SHIELD_OF_FAITH: CardDef = {
   cost: 1,
   rarity: 'starter',
   description: '获得与当前煞气等值的护甲。',
-  effects: { block: 12, shaqiGain: 0 },
+  effects: { blockFromShaqi: true, shaqiGain: 0 },
   icon: 'coin shield',
 }
 
@@ -148,6 +148,86 @@ const CALM_HEART: CardDef = {
   description: '恢复 10 理智。',
   effects: { sanCost: -10 },
   icon: 'calm heart',
+}
+
+// ==================== 法教初始卡牌 ====================
+
+// 符剑 - 法教基础攻击
+const TALISMAN_SWORD: CardDef = {
+  id: 'talisman_sword',
+  name: '符剑',
+  type: 'attack',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'starter',
+  description: '造成 7 伤害。法教基础剑术。',
+  effects: { damage: 7, shaqiGain: 2 },
+  icon: 'talisman sword',
+}
+
+// 护身咒 - 法教基础防御
+const PROTECTION_CHARM: CardDef = {
+  id: 'protection_charm',
+  name: '护身咒',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'starter',
+  description: '获得 6 护甲。',
+  effects: { block: 6, shaqiGain: 0 },
+  icon: 'protection charm',
+}
+
+// 真火咒 - 法教火攻
+const TRUE_FIRE_CHARM: CardDef = {
+  id: 'true_fire_charm',
+  name: '真火咒',
+  type: 'attack',
+  cardClass: 'firecraft',
+  cost: 1,
+  rarity: 'starter',
+  description: '造成 10 伤害。',
+  effects: { damage: 10, shaqiGain: 3 },
+  icon: 'true fire',
+}
+
+// 金光咒 - 法教强力护盾
+const GOLDEN_LIGHT_CHARM: CardDef = {
+  id: 'golden_light_charm',
+  name: '金光咒',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'starter',
+  description: '获得 10 护甲。',
+  effects: { block: 10, shaqiGain: 0 },
+  icon: 'golden light',
+}
+
+// 驱邪符 - 法教抽牌
+const EXORCISM_CHARM: CardDef = {
+  id: 'exorcism_charm',
+  name: '驱邪符',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'starter',
+  description: '抽 1 张牌，获得 2 煞气。',
+  effects: { draw: 1, shaqiGain: 2 },
+  icon: 'exorcism charm',
+}
+
+// 雷法 - 法教高费攻击
+const THUNDER_METHOD: CardDef = {
+  id: 'thunder_method',
+  name: '雷法',
+  type: 'attack',
+  cardClass: 'sorcerer',
+  cost: 2,
+  rarity: 'starter',
+  description: '造成 18 伤害。',
+  effects: { damage: 18, shaqiGain: 5 },
+  icon: 'thunder method',
 }
 
 // ==================== 奖励卡池（第 1 层） ====================
@@ -310,7 +390,14 @@ const GHOST_STEP: CardDef = {
   cost: 1,
   rarity: 'uncommon',
   description: '获得 12 护甲。若煞气 ≥50，额外抽 1 张牌。',
-  effects: { block: 12, draw: 1, shaqiGain: 0 },
+  effects: { 
+    block: 12, 
+    shaqiGain: 0,
+    conditional: {
+      condition: { type: 'shaqi_gte', value: 50 },
+      bonusDraw: 1
+    }
+  },
   icon: 'ghost step',
 }
 
@@ -323,7 +410,14 @@ const HEARTBREAKER: CardDef = {
   cost: 2,
   rarity: 'uncommon',
   description: '造成 12 伤害。若敌人 HP < 50%，伤害翻倍。',
-  effects: { damage: 12, shaqiGain: 3 },
+  effects: { 
+    damage: 12, 
+    shaqiGain: 3,
+    conditional: {
+      condition: { type: 'enemy_hp_pct_lte', value: 50 },
+      damageMultiplier: 2
+    }
+  },
   icon: 'heartbreaker',
 }
 
@@ -362,7 +456,13 @@ const MIND_EYE: CardDef = {
   cost: 1,
   rarity: 'uncommon',
   description: '抽 2 张牌。若煞气 ≥70，额外消耗 2 理智。',
-  effects: { draw: 2, sanCost: 2 },
+  effects: { 
+    draw: 2,
+    conditional: {
+      condition: { type: 'shaqi_gte', value: 70 },
+      bonusSanCost: 2
+    }
+  },
   icon: 'mind eye',
 }
 
@@ -426,7 +526,7 @@ const VOID_STRIKE: CardDef = {
   cost: 2,
   rarity: 'rare',
   description: '造成 25 伤害。每有 1 层道心，额外造成 3 伤害。',
-  effects: { damage: 25, shaqiGain: 5 },
+  effects: { damage: 25, shaqiGain: 5, damagePerDaoxin: 3 },
   icon: 'void strike',
 }
 
@@ -491,7 +591,14 @@ const SPIRIT_SHIELD: CardDef = {
   cost: 2,
   rarity: 'uncommon',
   description: '获得 20 护甲。若理智 < 50，额外获得 10 护甲。',
-  effects: { block: 20, shaqiGain: 0 },
+  effects: { 
+    block: 20, 
+    shaqiGain: 0,
+    conditional: {
+      condition: { type: 'san_lte', value: 49 },
+      bonusBlock: 10
+    }
+  },
   icon: 'spirit shield',
 }
 
@@ -655,3 +762,40 @@ export const REWARD_CARDS: CardDef[] = [
 export const ALL_ENEMIES: EnemyDef[] = [JAW_WORM, GHOST]
 export const ELITE_ENEMY: EnemyDef = BLOOD_CORPSE
 export const BOSS_ENEMY: EnemyDef = DAN_YANGZI
+
+// ==================== 卡牌查找 ====================
+
+// 所有卡牌定义的映射表（用于根据ID查找卡牌）
+const ALL_CARD_DEFS: CardDef[] = [
+  // 心素初始卡牌
+  STRIKE, WILD_SLASH, BLOOD_BLADE, GUARD, NUO_MASK, HEAVY_STRIKE,
+  BURN_BODY, SHIELD_OF_FAITH, WARRIOR_ROAR, MADNESS_MANTRA, EXORCISM_TALISMAN, CALM_HEART,
+  // 法教初始卡牌
+  TALISMAN_SWORD, PROTECTION_CHARM, TRUE_FIRE_CHARM, GOLDEN_LIGHT_CHARM, EXORCISM_CHARM, THUNDER_METHOD,
+  // 第1层奖励卡
+  SHOCK_SLASH, IRON_WAVE, BLOOD_DRAIN, QUICK_STRIKE, DAOXIN_POWER, BLOOD_MERGE,
+  // 第2层奖励卡
+  BLOOD_SHA_SLASH, GHOST_STEP, HEARTBREAKER, NUO_DANCE, BLOOD_SACRIFICE, MIND_EYE,
+  // 第3层奖励卡
+  VOID_STRIKE, SOUL_BURN, PUPPET_MASTER, DEMON_POSSESS, BLOOD_FURY, SPIRIT_SHIELD, FATAL_BLADE, DAO_MERGE,
+]
+
+// 卡牌ID到定义的映射
+const CARD_MAP: Record<string, CardDef> = {}
+for (const card of ALL_CARD_DEFS) {
+  CARD_MAP[card.id] = card
+}
+
+/**
+ * 根据卡牌ID获取卡牌定义
+ */
+export function getCardById(id: string): CardDef | undefined {
+  return CARD_MAP[id]
+}
+
+/**
+ * 根据卡牌ID列表获取卡牌定义数组
+ */
+export function getCardsByIds(ids: string[]): CardDef[] {
+  return ids.map(id => CARD_MAP[id]).filter((c): c is CardDef => c != null)
+}

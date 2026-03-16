@@ -1,8 +1,10 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef, GameMap, MapNode, MapNodeType, ShopItem, GameEvent } from './types'
-import { ALL_CARDS, REWARD_CARDS, REWARD_CARDS_LAYER2, REWARD_CARDS_LAYER3, BOSS_ENEMY_LAYER3, ALL_ENEMIES, ALL_ENEMIES_LAYER2, ALL_ENEMIES_LAYER3, ELITE_ENEMY, ELITE_ENEMY_LAYER2, ELITE_ENEMY_LAYER3 } from '../data/cards'
+import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef, GameMap, MapNode, MapNodeType, ShopItem, GameEvent, DamageFloatItem, CharacterDef } from './types'
+import { ALL_CARDS, REWARD_CARDS, REWARD_CARDS_LAYER2, REWARD_CARDS_LAYER3, BOSS_ENEMY_LAYER3, ALL_ENEMIES, ALL_ENEMIES_LAYER2, ALL_ENEMIES_LAYER3, ELITE_ENEMY, ELITE_ENEMY_LAYER2, ELITE_ENEMY_LAYER3, getCardsByIds } from '../data/cards'
+import { getCharacterById, CHARACTER_XINSU } from '../data/characters'
 import { getRandomEvent } from '../data/events'
+import { playSound } from '../utils/soundManager'
 
 // ==================== 存档版本 ====================
 // 存档版本号 - 用于未来版本迁移
@@ -175,6 +177,7 @@ interface GameState {
   phase: GamePhase
   turn: number
   player: PlayerState
+  characterId: string  // 当前角色ID
   enemy: EnemyState | null
   enemyQueue: EnemyDef[]
   drawPile: CardDef[]
@@ -197,9 +200,12 @@ interface GameState {
   removeCost: number  // 移除卡牌费用
   // 事件系统
   currentEvent: GameEvent | null
+  // 伤害飘字
+  damageFloats: DamageFloatItem[]
   // 方法
   log: (msg: string) => void
-  newGame: () => void
+  newGame: (characterId?: string) => void
+  selectCharacter: (characterId: string) => void  // 选择角色
   clearSave: () => void  // 清除存档
   playCard: (index: number) => void
   endPlayerTurn: () => void
@@ -218,14 +224,34 @@ interface GameState {
   // 事件方法
   chooseEventOption: (choiceIndex: number) => void
   confirmAutoEvent: () => void
+  // 飘字方法
+  showDamageFloat: (value: number, type: DamageFloatItem['type'], target: DamageFloatItem['target']) => void
+  clearDamageFloats: () => void
 }
 
-function mkPlayer(): PlayerState {
+function mkPlayer(character: CharacterDef = CHARACTER_XINSU): PlayerState {
   return {
-    hp: 80, maxHp: 80, energy: 3, maxEnergy: 3, block: 0,
-    buffs: [], san: 100, maxSan: 100, shaqi: 0, maxShaqi: 100,
-    daoxin: 0, maxDaoxin: 10, isMad: false, madTurnCount: 0, gold: 0,
+    hp: character.maxHp, 
+    maxHp: character.maxHp, 
+    energy: character.maxEnergy, 
+    maxEnergy: character.maxEnergy, 
+    block: 0,
+    buffs: [], 
+    san: character.maxSan, 
+    maxSan: character.maxSan, 
+    shaqi: 0, 
+    maxShaqi: character.maxShaqi,
+    daoxin: 0, 
+    maxDaoxin: 10, 
+    isMad: false, 
+    madTurnCount: 0, 
+    gold: 0,
   }
+}
+
+// 根据角色获取初始卡组
+function getStartingDeck(character: CharacterDef): CardDef[] {
+  return getCardsByIds(character.startingDeck)
 }
 
 function mkEnemy(def: EnemyDef): EnemyState {
@@ -252,9 +278,10 @@ function drawCards(drawPile: CardDef[], discardPile: CardDef[], count: number): 
 export const useGameStore = create<GameState>()(
   persist(
     (set, get) => ({
-      phase: 'map',
+      phase: 'character_select',
       turn: 1,
       player: mkPlayer(),
+      characterId: CHARACTER_XINSU.id,
       enemy: null,
       enemyQueue: [],
       drawPile: [],
@@ -273,18 +300,38 @@ export const useGameStore = create<GameState>()(
       shopItems: null,
       removeCost: 50,
       currentEvent: null,
+      damageFloats: [],
 
   log: (msg: string) => set(s => ({ battleLog: [...s.battleLog.slice(-50), msg] })),
 
-  newGame: () => {
+  // 飘字方法
+  showDamageFloat: (value: number, type: DamageFloatItem['type'], target: DamageFloatItem['target']) => {
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`
+    set(s => ({
+      damageFloats: [...s.damageFloats.slice(-10), { id, value, type, target }]
+    }))
+    // 1.5秒后自动清除
+    setTimeout(() => {
+      set(s => ({ damageFloats: s.damageFloats.filter(f => f.id !== id) }))
+    }, 1500)
+  },
+
+  clearDamageFloats: () => set({ damageFloats: [] }),
+
+  // 选择角色后开始新游戏
+  selectCharacter: (characterId: string) => {
+    const character = getCharacterById(characterId) || CHARACTER_XINSU
     const newMap = generateMap()
+    const startingDeck = getStartingDeck(character)
+    
     set({
       phase: 'map',
       turn: 1,
-      player: mkPlayer(),
+      player: mkPlayer(character),
+      characterId: character.id,
       enemy: null,
       enemyQueue: [],
-      drawPile: [],
+      drawPile: shuffle([...startingDeck]),
       hand: [],
       discardPile: [],
       exhaustPile: [],
@@ -299,6 +346,38 @@ export const useGameStore = create<GameState>()(
       goldReward: 0,
       shopItems: null,
       currentEvent: null,
+      damageFloats: [],
+    })
+  },
+
+  newGame: (characterId?: string) => {
+    const character = characterId ? (getCharacterById(characterId) || CHARACTER_XINSU) : CHARACTER_XINSU
+    const newMap = generateMap()
+    const startingDeck = getStartingDeck(character)
+    
+    set({
+      phase: 'map',
+      turn: 1,
+      player: mkPlayer(character),
+      characterId: character.id,
+      enemy: null,
+      enemyQueue: [],
+      drawPile: shuffle([...startingDeck]),
+      hand: [],
+      discardPile: [],
+      exhaustPile: [],
+      battleLog: [],
+      animating: false,
+      rewardCards: null,
+      exorcismMode: false,
+      bossPhaseChange: false,
+      map: newMap,
+      currentNodeId: newMap.startNodeId,
+      selectedNodeId: null,
+      goldReward: 0,
+      shopItems: null,
+      currentEvent: null,
+      damageFloats: [],
     })
   },
 
@@ -324,10 +403,43 @@ export const useGameStore = create<GameState>()(
     const fx = card.effects
     const log = get().log
 
+    // 条件判断辅助函数
+    const checkCondition = (): boolean => {
+      if (!fx.conditional) return false
+      const cond = fx.conditional.condition
+      switch (cond.type) {
+        case 'shaqi_gte':
+          return p.shaqi >= cond.value
+        case 'san_lte':
+          return p.san <= cond.value
+        case 'enemy_hp_pct_lte':
+          return (e.hp / e.maxHp) * 100 <= cond.value
+        default:
+          return false
+      }
+    }
+    const conditionMet = checkCondition()
+
     // 攻击
     if (fx.damage && fx.damage > 0) {
       const isVuln = e.buffs.some(b => b.type === 'vulnerable')
       let dmg = calcDamage(fx.damage, p.shaqi, p.buffs, p.isMad)
+      
+      // 道心加伤
+      if (fx.damagePerDaoxin) {
+        const extraDmg = p.daoxin * fx.damagePerDaoxin
+        dmg += extraDmg
+        if (extraDmg > 0) {
+          log(`✨ 道心加伤 +${extraDmg}`)
+        }
+      }
+      
+      // 条件伤害翻倍
+      if (conditionMet && fx.conditional?.damageMultiplier) {
+        dmg = Math.floor(dmg * fx.conditional.damageMultiplier)
+        log(`⚡ 条件达成！伤害 ×${fx.conditional.damageMultiplier}`)
+      }
+      
       if (isVuln) dmg = Math.floor(dmg * 1.5)
 
       // 扣护甲
@@ -343,6 +455,12 @@ export const useGameStore = create<GameState>()(
 
       e.hp = Math.max(0, e.hp - dmg)
       log(`⚔️ ${card.name}：${dmg > 0 ? `造成 ${dmg} 伤害` : '被格挡'}（敌HP: ${e.hp}/${e.maxHp}）`)
+      
+      // 伤害飘字和音效
+      if (dmg > 0) {
+        get().showDamageFloat(dmg, 'damage', 'enemy')
+        playSound('attack')
+      }
 
       // 煞气
       if (fx.shaqiGain) {
@@ -353,9 +471,26 @@ export const useGameStore = create<GameState>()(
     }
 
     // 护甲
-    if (fx.block) {
-      p.block += fx.block
-      log(`🛡️ ${card.name}：获得 ${fx.block} 护甲`)
+    let blockValue = fx.block || 0
+    
+    // 护甲 = 煞气值
+    if (fx.blockFromShaqi) {
+      blockValue = p.shaqi
+      log(`🔮 煞气护甲：${blockValue}`)
+    }
+    
+    // 条件额外护甲
+    if (conditionMet && fx.conditional?.bonusBlock) {
+      blockValue += fx.conditional.bonusBlock
+      log(`⚡ 条件达成！额外护甲 +${fx.conditional.bonusBlock}`)
+    }
+    
+    if (blockValue > 0) {
+      p.block += blockValue
+      log(`🛡️ ${card.name}：获得 ${blockValue} 护甲`)
+      // 护甲飘字
+      get().showDamageFloat(blockValue, 'block', 'player')
+      playSound('block')
       if (fx.shaqiGain) {
         const newShaqi = Math.min(p.maxShaqi, p.shaqi + fx.shaqiGain)
         p.shaqi = newShaqi
@@ -366,20 +501,37 @@ export const useGameStore = create<GameState>()(
     if (fx.hpCost) {
       p.hp = Math.max(1, p.hp - fx.hpCost)
       log(`🩸 消耗 ${fx.hpCost} HP（剩余: ${p.hp}）`)
+      // 自残飘字
+      get().showDamageFloat(fx.hpCost, 'damage', 'player')
     }
 
     // 理智
-    if (fx.sanCost) {
-      p.san = Math.max(0, Math.min(p.maxSan, p.san - fx.sanCost))
+    let sanCost = fx.sanCost || 0
+    // 条件额外理智消耗
+    if (conditionMet && fx.conditional?.bonusSanCost) {
+      sanCost += fx.conditional.bonusSanCost
+      log(`⚡ 条件达成！额外消耗 ${fx.conditional.bonusSanCost} 理智`)
+    }
+    if (sanCost > 0) {
+      p.san = Math.max(0, Math.min(p.maxSan, p.san - sanCost))
       log(`🧠 理智 ${p.san}`)
+      // 理智飘字
+      get().showDamageFloat(sanCost, 'san', 'player')
     }
 
     // 抽牌
-    if (fx.draw) {
-      const { drawn, newDraw, newDiscard } = drawCards(dp, disc, fx.draw)
+    let drawCount = fx.draw || 0
+    // 条件额外抽牌
+    if (conditionMet && fx.conditional?.bonusDraw) {
+      drawCount += fx.conditional.bonusDraw
+      log(`⚡ 条件达成！额外抽 ${fx.conditional.bonusDraw} 张`)
+    }
+    if (drawCount > 0) {
+      const { drawn, newDraw, newDiscard } = drawCards(dp, disc, drawCount)
       hand.push(...drawn)
       dp = newDraw
       disc = newDiscard
+      log(`📥 抽 ${drawCount} 张牌`)
     }
 
     // 自身 buff（力量/血肉同化/道心等）
@@ -411,6 +563,8 @@ export const useGameStore = create<GameState>()(
       p.madTurnCount = 0
       p.energy = 5
       log(`🔥🔥🔥 走火入魔！所有伤害 ×3！`)
+      // 入魔音效
+      playSound('madness')
     }
 
     // 驱魔符 - 进入选择模式，揭示一张牌的真伪
@@ -535,6 +689,9 @@ export const useGameStore = create<GameState>()(
       if (dmg > 0) {
         p.hp = Math.max(0, p.hp - dmg)
         log(`💥 受到 ${dmg} 伤害（HP: ${p.hp}/${p.maxHp}）`)
+        // 伤害飘字和音效
+        get().showDamageFloat(dmg, 'damage', 'player')
+        playSound('hit')
       } else {
         log(`🛡️ 格挡了所有伤害`)
       }
@@ -550,6 +707,8 @@ export const useGameStore = create<GameState>()(
         // 理智攻击
         p.san = Math.max(0, p.san - (intent.buffAmount ?? 0))
         log(`🖤 心素撕裂：理智 -${intent.buffAmount}（${p.san}/${p.maxSan}）`)
+        // 理智飘字
+        get().showDamageFloat(intent.buffAmount ?? 0, 'san', 'player')
       } else {
         e.buffs = [...e.buffs, { type: intent.buffType!, amount: intent.buffAmount ?? 0, duration: 999 }]
         log(`👹 施放「${intent.buffType}」`)
@@ -559,6 +718,8 @@ export const useGameStore = create<GameState>()(
     if (intent.type === 'heal' && intent.value) {
       e.hp = Math.min(e.maxHp, e.hp + intent.value)
       log(`🩸 黑莲绽放：恢复 ${intent.value} HP（${e.hp}/${e.maxHp}）`)
+      // 敌人治疗飘字
+      get().showDamageFloat(intent.value, 'heal', 'enemy')
     }
 
     // 玩家死亡
@@ -795,15 +956,16 @@ export const useGameStore = create<GameState>()(
       case 'battle':
       case 'elite':
         if (!node.enemyDef) return
-        const deck = shuffle([...ALL_CARDS, ...s.discardPile, ...s.drawPile, ...s.hand])
-        const { drawn, newDraw } = drawCards(deck, [], 5)
+        // 使用当前抽牌堆作为牌库
+        const deck = shuffle([...s.drawPile, ...s.discardPile, ...s.hand])
+        const { drawn, newDraw } = drawCards(deck.length > 0 ? deck : s.drawPile, [], 5)
         log(`⚔️ 遭遇 ${node.enemyDef.name}！HP: ${node.enemyDef.hp}`)
         set({
           phase: 'player_turn',
           turn: 1,
           enemy: mkEnemy(node.enemyDef),
           drawPile: newDraw,
-          hand: drawn,
+          hand: drawn.length > 0 ? drawn : [],
           discardPile: [],
           goldReward: node.type === 'elite' ? 30 : 15,
         })
@@ -858,8 +1020,9 @@ export const useGameStore = create<GameState>()(
 
       case 'boss':
         if (!node.enemyDef) return
-        const bossDeck = shuffle([...ALL_CARDS, ...s.discardPile, ...s.drawPile, ...s.hand])
-        const { drawn: bossHand, newDraw: bossDraw } = drawCards(bossDeck, [], 5)
+        // 使用当前抽牌堆作为牌库
+        const bossDeck = shuffle([...s.drawPile, ...s.discardPile, ...s.hand])
+        const { drawn: bossHand, newDraw: bossDraw } = drawCards(bossDeck.length > 0 ? bossDeck : s.drawPile, [], 5)
         log(`👹 BOSS战：${node.enemyDef.name}！`)
         
         // 黑莲老祖特殊机制：黑莲诅咒
@@ -876,7 +1039,7 @@ export const useGameStore = create<GameState>()(
           enemy: mkEnemy(node.enemyDef),
           player: bossPlayer,
           drawPile: bossDraw,
-          hand: bossHand,
+          hand: bossHand.length > 0 ? bossHand : [],
           discardPile: [],
           goldReward: 50,
         })
@@ -1108,6 +1271,7 @@ export const useGameStore = create<GameState>()(
         phase: state.phase,
         turn: state.turn,
         player: state.player,
+        characterId: state.characterId,
         enemy: state.enemy,
         enemyQueue: state.enemyQueue,
         drawPile: state.drawPile,
