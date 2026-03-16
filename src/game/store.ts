@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef, GameMap, MapNode, MapNodeType, ShopItem, GameEvent } from './types'
-import { ALL_CARDS, REWARD_CARDS, BLOOD_CORPSE, BOSS_ENEMY, ALL_ENEMIES } from '../data/cards'
+import { ALL_CARDS, REWARD_CARDS, REWARD_CARDS_LAYER2, REWARD_CARDS_LAYER3, BOSS_ENEMY, BOSS_ENEMY_LAYER3, ALL_ENEMIES, ALL_ENEMIES_LAYER2, ALL_ENEMIES_LAYER3, ELITE_ENEMY, ELITE_ENEMY_LAYER2, ELITE_ENEMY_LAYER3 } from '../data/cards'
 import { getRandomEvent } from '../data/events'
 
 // ==================== 存档版本 ====================
@@ -93,14 +93,22 @@ function generateMap(): GameMap {
         else type = 'elite'
       }
 
-      // 为战斗节点预分配敌人
+      // 为战斗节点预分配敌人（根据层数选择敌人池）
       let enemyDef: EnemyDef | undefined
       if (type === 'battle') {
-        enemyDef = shuffle([...ALL_ENEMIES])[0]
+        // 第1-2层使用第1层敌人，第3层使用第2层敌人，第4层使用第3层敌人
+        let enemies = ALL_ENEMIES
+        if (layer === 3) enemies = ALL_ENEMIES_LAYER2
+        else if (layer >= 4) enemies = ALL_ENEMIES_LAYER3
+        enemyDef = shuffle([...enemies])[0]
       } else if (type === 'elite') {
-        enemyDef = BLOOD_CORPSE
+        // 第1-2层使用第1层精英，第3层使用第2层精英，第4层使用第3层精英
+        if (layer === 3) enemyDef = ELITE_ENEMY_LAYER2
+        else if (layer >= 4) enemyDef = ELITE_ENEMY_LAYER3
+        else enemyDef = ELITE_ENEMY
       } else if (type === 'boss') {
-        enemyDef = BOSS_ENEMY
+        // 最终Boss使用第3层Boss
+        enemyDef = BOSS_ENEMY_LAYER3
       }
 
       nodes.push({
@@ -450,10 +458,17 @@ export const useGameStore = create<GameState>()(
       // 获得金币奖励
       p.gold += s.goldReward
       log(`💰 获得 ${s.goldReward} 金币（共 ${p.gold}）`)
+
+      // 根据当前层数选择奖励卡池
+      const currentLayer = s.map?.nodes.find(n => n.id === s.selectedNodeId)?.layer ?? 1
+      let rewardPool = REWARD_CARDS
+      if (currentLayer === 3) rewardPool = REWARD_CARDS_LAYER2
+      else if (currentLayer >= 4) rewardPool = REWARD_CARDS_LAYER3
+
       set({
         player: p, enemy: e, hand, drawPile: dp, discardPile: disc,
         phase: 'victory',
-        rewardCards: shuffle([...REWARD_CARDS]).slice(0, 3),
+        rewardCards: shuffle([...rewardPool]).slice(0, 3),
       })
       return
     }
@@ -760,11 +775,15 @@ export const useGameStore = create<GameState>()(
         break
 
       case 'shop':
-        // 商店：生成商品
-        const shopCards = shuffle([...REWARD_CARDS]).slice(0, 4)
+        // 商店：生成商品（根据层数选择卡池）
+        const currentLayer = node.layer
+        let shopPool = REWARD_CARDS
+        if (currentLayer === 3) shopPool = REWARD_CARDS_LAYER2
+        else if (currentLayer >= 4) shopPool = REWARD_CARDS_LAYER3
+        const shopCards = shuffle([...shopPool]).slice(0, 4)
         const items: ShopItem[] = shopCards.map(card => ({
           card,
-          price: card.rarity === 'common' ? 50 : card.rarity === 'uncommon' ? 75 : 100,
+          price: card.rarity === 'common' ? 50 : card.rarity === 'uncommon' ? 75 : card.rarity === 'rare' ? 100 : 50,
           sold: false,
         }))
         log(`🏪 进入商店，有 ${items.length} 张卡牌出售`)

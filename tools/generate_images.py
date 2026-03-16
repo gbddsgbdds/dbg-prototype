@@ -61,6 +61,32 @@ ICON_MAP = {
     'ghost': '👻',
     'blood corpse': '💀',
     'dan yangzi': '🧙',
+    # 第2层卡牌
+    'blood sha slash': '🗡️',
+    'ghost step': '👻',
+    'heartbreaker': '💔',
+    'nuo dance': '💃',
+    'blood sacrifice': '🩸',
+    'mind eye': '👁️',
+    # 第3层卡牌
+    'void strike': '🌌',
+    'soul burn': '🔥',
+    'puppet master': '🎭',
+    'demon possess': '👹',
+    'blood fury': '😤',
+    'spirit shield': '🛡️',
+    'fatal blade': '⚔️',
+    'dao merge': '☯️',
+    # 第2层敌人
+    'sha ghost': '👻',
+    'heart demon': '😈',
+    'blood puppet': '🎭',
+    # 第3层敌人
+    'sha demon': '👹',
+    'heart sha': '😈',
+    'blood corpse 2': '💀',
+    'blood sha master': '🧛',
+    'black lotus ancestor': '🪷',
 }
 
 
