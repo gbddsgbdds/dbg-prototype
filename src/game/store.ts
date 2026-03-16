@@ -22,10 +22,11 @@ function calcDamage(base: number, shaqi: number, buffs: BuffEffect[], isMad: boo
   let dmg = base
   for (const b of buffs) {
     if (b.type === 'strength' || b.type === 'attackBuff') dmg += b.amount
+    if (b.type === 'fear') dmg -= b.amount
   }
   dmg = Math.floor(dmg * (1 + shaqi / 100))
   if (isMad) dmg *= 3
-  return Math.floor(dmg)
+  return Math.max(0, Math.floor(dmg))
 }
 
 // ==================== Store ====================
@@ -96,6 +97,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   battleLog: [],
   animating: false,
   rewardCards: null,
+  exorcismMode: false,
 
   log: (msg: string) => set(s => ({ battleLog: [...s.battleLog.slice(-50), msg] })),
 
@@ -109,7 +111,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       enemy: mkEnemy(first), enemyQueue: enemies.slice(1),
       drawPile: newDraw, hand: drawn, discardPile: [], exhaustPile: [],
       battleLog: [`⚔️ 遭遇 ${first.name}！HP: ${first.hp}`],
-      animating: false, rewardCards: null,
+      animating: false, rewardCards: null, exorcismMode: false,
     })
   },
 
@@ -219,9 +221,42 @@ export const useGameStore = create<GameState>((set, get) => ({
       log(`🔥🔥🔥 走火入魔！所有伤害 ×3！`)
     }
 
-    // 驱魔符
+    // 驱魔符 - 进入选择模式而非直接消耗
     if (card.id === 'exorcism_talisman') {
-      log(`🔍 使用驱魔符`)
+      // 不消耗手牌，进入选择模式
+      // 先把卡从手牌移除加到消耗堆
+      hand.splice(index, 1)
+      set({
+        player: p, hand, drawPile: dp, discardPile: disc, exorcismMode: true,
+      })
+      log(`🔍 使用驱魔符...请选择一张要查看的牌`)
+      return
+    }
+
+    // 幻觉牌打出结算
+    if (card.isHallucination) {
+      const roll = Math.random()
+      if (roll < 0.4) {
+        // 0 伤害 - 效果无效，直接弃牌
+        log(`👁️ 幻觉！这张牌是假的...效果无效`)
+        disc.push(card)
+        set({ player: p, enemy: e, hand, drawPile: dp, discardPile: disc })
+        return
+      } else if (roll < 0.7) {
+        // 反伤 50%
+        const originalDmg = fx.damage || 0
+        const reflectDmg = Math.floor(originalDmg * 0.5)
+        p.hp = Math.max(0, p.hp - reflectDmg)
+        log(`👁️ 幻觉反噬！反伤 ${reflectDmg}（HP: ${p.hp}/${p.maxHp}）`)
+        if (p.hp <= 0) {
+          set({ phase: 'game_over', player: p, battleLog: [...s.battleLog, '💀 幻觉反噬致死...'] })
+          return
+        }
+      } else {
+        // 恐惧 debuff - 减少伤害
+        p.buffs = [...p.buffs, { type: 'fear', amount: 3, duration: 2 }]
+        log(`👁️ 幻觉恐惧！你获得「恐惧」debuff（攻击-3，持续2回合）`)
+      }
     }
 
     // 弃牌
@@ -349,14 +384,25 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const { drawn, newDraw, newDiscard } = drawCards(dp, disc, 5)
 
+    // 幻觉牌生成：煞性≥60时20%概率将一张手牌标记为幻觉
+    let finalHand = drawn
+    if (p.shaqi >= 60 && !p.isMad && drawn.length > 0 && Math.random() < 0.2) {
+      const hallIdx = Math.floor(Math.random() * drawn.length)
+      finalHand = drawn.map((c, i) =>
+        i === hallIdx ? { ...c, isHallucination: true } : c
+      )
+      log(`👁️ 煞性侵蚀...你的「${drawn[hallIdx].name}」变得模糊不清...`)
+    }
+
     set({
       phase: 'player_turn',
       turn: s.turn + 1,
       player: p,
       enemy: e,
-      hand: drawn,
+      hand: finalHand,
       drawPile: newDraw,
       discardPile: newDiscard,
+      exorcismMode: false,
     })
   },
 
@@ -391,5 +437,14 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   skipReward: () => {
     set({ rewardCards: null })
+  },
+
+  useExorcismTalisman: (index: number) => {
+    const s = get()
+    const card = s.hand[index]
+    if (!card) return
+    const log = get().log
+    log(`🔍 驱魔符：翻开第 ${index + 1} 张牌`)
+    // TODO: 实现幻觉牌翻面逻辑
   },
 }))
