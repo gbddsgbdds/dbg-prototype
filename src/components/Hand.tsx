@@ -22,7 +22,7 @@ const cardVariants = {
     scale: 1,
     rotate: 0,
     transition: {
-      type: 'spring',
+      type: 'spring' as const,
       stiffness: 300,
       damping: 25,
     },
@@ -35,7 +35,7 @@ const cardVariants = {
     rotate: 10,
     transition: {
       duration: 0.35,
-      ease: 'easeOut',
+      ease: 'easeOut' as const,
     },
   },
   // 弃牌动画：向右下飞出
@@ -47,7 +47,7 @@ const cardVariants = {
     rotate: 15,
     transition: {
       duration: 0.4,
-      ease: 'easeIn',
+      ease: 'easeIn' as const,
     },
   },
 }
