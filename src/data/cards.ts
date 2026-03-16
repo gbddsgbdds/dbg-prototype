@@ -22,8 +22,8 @@ const WILD_SLASH: CardDef = {
   cardClass: 'warrior',
   cost: 1,
   rarity: 'starter',
-  description: '造成 6 伤害，获得 5 煞气。',
-  effects: { damage: 6, shaqiGain: 5 },
+  description: '造成 7 伤害，获得 5 煞气。',
+  effects: { damage: 7, shaqiGain: 5 },
   icon: 'wild slash',
 }
 

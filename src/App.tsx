@@ -1,23 +1,40 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense, lazy } from 'react'
 import { useGameStore, hasSaveData } from './game/store'
 import { useMetaStore } from './game/meta'
 import { Hand } from './components/Hand'
 import { Enemy } from './components/Enemy'
 import { PlayerStatus } from './components/PlayerStatus'
 import { BattleLog } from './components/BattleLog'
-import { VictoryScreen } from './components/VictoryScreen'
-import { GameOverScreen } from './components/GameOverScreen'
-import { Changelog } from './components/Changelog'
-import { DeckViewer } from './components/DeckViewer'
-import { MapScreen } from './components/MapScreen'
-import { ShopScreen } from './components/ShopScreen'
-import { EventScreen } from './components/EventScreen'
-import { CharacterSelect } from './components/CharacterSelect'
 import { EnemyDamageFloat, PlayerDamageFloat } from './components/DamageFloat'
-import { AchievementScreen } from './components/AchievementScreen'
-import { AchievementPopup } from './components/AchievementPopup'
 import './App.css'
+
+// 懒加载非首屏组件
+const VictoryScreen = lazy(() => import('./components/VictoryScreen').then(m => ({ default: m.VictoryScreen })))
+const GameOverScreen = lazy(() => import('./components/GameOverScreen').then(m => ({ default: m.GameOverScreen })))
+const Changelog = lazy(() => import('./components/Changelog').then(m => ({ default: m.Changelog })))
+const DeckViewer = lazy(() => import('./components/DeckViewer').then(m => ({ default: m.DeckViewer })))
+const MapScreen = lazy(() => import('./components/MapScreen').then(m => ({ default: m.MapScreen })))
+const ShopScreen = lazy(() => import('./components/ShopScreen').then(m => ({ default: m.ShopScreen })))
+const EventScreen = lazy(() => import('./components/EventScreen').then(m => ({ default: m.EventScreen })))
+const CharacterSelect = lazy(() => import('./components/CharacterSelect').then(m => ({ default: m.CharacterSelect })))
+const AchievementScreen = lazy(() => import('./components/AchievementScreen').then(m => ({ default: m.AchievementScreen })))
+const AchievementPopup = lazy(() => import('./components/AchievementPopup').then(m => ({ default: m.AchievementPopup })))
+
+// 加载状态组件
+function LoadingFallback() {
+  return (
+    <div className="loading-fallback">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+        style={{ fontSize: '2rem' }}
+      >
+        ⚙️
+      </motion.div>
+    </div>
+  )
+}
 
 // Boss阶段切换提示组件
 function BossPhaseAlert() {
@@ -110,7 +127,11 @@ function App() {
 
   // 角色选择界面
   if (phase === 'character_select' && !map) {
-    return <CharacterSelect />
+    return (
+      <Suspense fallback={<LoadingFallback />}>
+        <CharacterSelect />
+      </Suspense>
+    )
   }
 
   // 开始界面
@@ -123,12 +144,16 @@ function App() {
     return (
       <>
         {/* 成就弹窗 */}
-        <AchievementPopup />
+        <Suspense fallback={null}>
+          <AchievementPopup />
+        </Suspense>
         
         {/* 成就界面 */}
         <AnimatePresence>
           {showAchievements && (
-            <AchievementScreen onClose={() => setShowAchievements(false)} />
+            <Suspense fallback={<LoadingFallback />}>
+              <AchievementScreen onClose={() => setShowAchievements(false)} />
+            </Suspense>
           )}
         </AnimatePresence>
       
@@ -197,8 +222,10 @@ function App() {
           </div>
 
           <div className="start-footer">
-            <Changelog />
-            <span className="version-tag">v0.5.3</span>
+            <Suspense fallback={<span>...</span>}>
+              <Changelog />
+            </Suspense>
+            <span className="version-tag">v0.5.5</span>
           </div>
         </div>
       </>
@@ -209,7 +236,9 @@ function App() {
   if (phase === 'map') {
     return (
       <div className="game-wrapper">
-        <MapScreen />
+        <Suspense fallback={<LoadingFallback />}>
+          <MapScreen />
+        </Suspense>
         {/* 玩家状态栏（显示在地图界面底部） */}
         <div className="map-player-status">
           <div className="status-item hp">
@@ -233,7 +262,9 @@ function App() {
   if (phase === 'shop') {
     return (
       <div className="game-wrapper shop-wrapper">
-        <ShopScreen />
+        <Suspense fallback={<LoadingFallback />}>
+          <ShopScreen />
+        </Suspense>
       </div>
     )
   }
@@ -242,7 +273,9 @@ function App() {
   if (phase === 'event') {
     return (
       <div className="game-wrapper event-wrapper">
-        <EventScreen />
+        <Suspense fallback={<LoadingFallback />}>
+          <EventScreen />
+        </Suspense>
       </div>
     )
   }
@@ -251,7 +284,9 @@ function App() {
   return (
     <div className={`game-container ${player.isMad ? 'madness-screen' : ''} ${bossPhaseChange ? 'screen-shake' : ''}`}>
       <div className="top-bar">
-        <DeckViewer />
+        <Suspense fallback={null}>
+          <DeckViewer />
+        </Suspense>
       </div>
       <div className="battle-area">
         <Enemy />
@@ -263,12 +298,22 @@ function App() {
       </div>
       <BattleLog />
       <Hand />
-      {phase === 'victory' && <VictoryScreen />}
-      {phase === 'game_over' && <GameOverScreen />}
+      {phase === 'victory' && (
+        <Suspense fallback={<LoadingFallback />}>
+          <VictoryScreen />
+        </Suspense>
+      )}
+      {phase === 'game_over' && (
+        <Suspense fallback={<LoadingFallback />}>
+          <GameOverScreen />
+        </Suspense>
+      )}
       <BossPhaseAlert />
       <MadnessOverlay />
       {/* 成就弹窗 */}
-      <AchievementPopup />
+      <Suspense fallback={null}>
+        <AchievementPopup />
+      </Suspense>
     </div>
   )
 }

@@ -157,6 +157,134 @@
   }
 }
 
+/* === 手机端深度适配 (400px及以下) === */
+@media (max-width: 400px) {
+  .character-select-screen {
+    padding: 12px;
+  }
+  
+  .character-select-screen h1 {
+    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .character-select-screen .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+  
+  .character-list {
+    gap: 12px;
+  }
+  
+  .character-card {
+    padding: 16px;
+    border-radius: 12px;
+    max-width: 100%;
+  }
+  
+  .character-card::before {
+    height: 2px;
+  }
+  
+  .character-header {
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .character-icon {
+    font-size: 2rem;
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 10px;
+  }
+  
+  .character-titles {
+    gap: 2px;
+  }
+  
+  .character-name {
+    font-size: 1.2rem;
+  }
+  
+  .character-title {
+    font-size: 0.8rem;
+  }
+  
+  .character-description {
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin-bottom: 10px;
+    min-height: 34px;
+  }
+  
+  .character-stats {
+    gap: 8px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 6px;
+  }
+  
+  .character-stats .stat-label {
+    font-size: 0.65rem;
+  }
+  
+  .character-stats .stat-value {
+    font-size: 1rem;
+  }
+  
+  .character-select-btn {
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* === 触控设备优化 === */
+@media (hover: none) and (pointer: coarse) {
+  /* 角色卡片触控区域 */
+  .character-card {
+    min-height: 48px;
+  }
+  
+  .character-card:active {
+    transform: scale(0.98);
+    transition: transform 0.1s;
+  }
+  
+  /* 选择按钮触控友好 */
+  .character-select-btn {
+    min-height: 48px;
+  }
+  
+  /* 移除hover效果（避免触控设备上卡在hover状态） */
+  .character-card:hover {
+    border-color: #3a3a5a;
+  }
+  
+  .character-card:hover .character-select-btn {
+    background: linear-gradient(135deg, #8b0000 0%, #660000 100%);
+  }
+  
+  /* 小屏幕触控优化 */
+  @media (max-width: 400px) {
+    .character-icon {
+      min-width: 48px;
+      min-height: 48px;
+    }
+    
+    .character-select-btn {
+      min-height: 44px;
+    }
+  }
+}
+
 /* === 超宽屏幕适配 (≥1400px) === */
 @media (min-width: 1400px) {
   .character-select-screen {
