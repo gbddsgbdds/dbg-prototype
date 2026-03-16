@@ -598,12 +598,16 @@ const BLACK_LOTUS_ANCESTOR: EnemyDef = {
   type: 'boss',
   phase: 1,
   phaseThreshold: 60,
-  specialMechanics: '黑莲化身，修仙界魔头',
+  specialMechanics: '黑莲化身，修仙界魔头。开场施加黑莲诅咒（每回合-5理智），阶段2可恢复HP。',
+  // 阶段1意图
   intents: [
     { type: 'attack', value: 18 },
     { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 10 },
     { type: 'defend', value: 15 },
     { type: 'attack', value: 18 },
+    // 阶段2额外意图（HP <= 60时）
+    { type: 'heal', value: 10 },  // 黑莲绽放：恢复HP
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 15 },  // 心素撕裂
   ],
   icon: 'black lotus ancestor',
 }

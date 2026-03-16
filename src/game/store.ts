@@ -74,7 +74,9 @@ function generateMap(): GameMap {
 
   for (let layer = 1; layer <= LAYER_COUNT; layer++) {
     layerNodes[layer] = []
-    const nodeCount = NODES_PER_LAYER
+    
+    // 第 4 层（最终层）特殊设计：前置战斗 + Boss
+    const nodeCount = layer === LAYER_COUNT ? 2 : NODES_PER_LAYER
 
     for (let col = 0; col < nodeCount; col++) {
       const id = `node_${nodeId++}`
@@ -83,7 +85,8 @@ function generateMap(): GameMap {
       // 确定节点类型
       let type: MapNodeType = 'battle'
       if (layer === LAYER_COUNT) {
-        type = 'boss'
+        // 第 4 层：第一个节点是精英战，第二个是 Boss
+        type = col === 0 ? 'elite' : 'boss'
       } else {
         const roll = Math.random()
         if (roll < 0.60) type = 'battle'
@@ -486,6 +489,13 @@ export const useGameStore = create<GameState>()(
     let dp = [...s.drawPile]
     let disc = [...s.discardPile, ...s.hand]
 
+    // 黑莲诅咒效果：每回合-5理智
+    const blackLotusCurse = p.buffs.find(b => b.type === 'blackLotusCurse')
+    if (blackLotusCurse) {
+      p.san = Math.max(0, p.san - blackLotusCurse.amount)
+      log(`🖤 黑莲诅咒：理智 -${blackLotusCurse.amount}（${p.san}/${p.maxSan}）`)
+    }
+
     // 煞性扣理智
     if (p.shaqi >= 30 && !p.isMad) {
       const sanLoss = Math.min(10, Math.ceil((p.shaqi - 29) / 10))
@@ -508,7 +518,7 @@ export const useGameStore = create<GameState>()(
 
     // 敌人行动
     const intent = e.intent
-    log(`👹 ${e.def.name} → ${intent.type === 'attack' ? `攻击 ${intent.value}` : intent.type === 'defend' ? `防御 ${intent.value}` : intent.type === 'buff' ? `施放 ${intent.buffType}` : intent.type}`)
+    log(`👹 ${e.def.name} → ${intent.type === 'attack' ? `攻击 ${intent.value}` : intent.type === 'defend' ? `防御 ${intent.value}` : intent.type === 'buff' ? `施放 ${intent.buffType}` : intent.type === 'heal' ? `恢复 ${intent.value} HP` : intent.type}`)
 
     if (intent.type === 'attack' && intent.value) {
       let dmg = intent.value
@@ -536,8 +546,19 @@ export const useGameStore = create<GameState>()(
     }
 
     if (intent.type === 'buff' && intent.buffType) {
-      e.buffs = [...e.buffs, { type: intent.buffType!, amount: intent.buffAmount ?? 0, duration: 999 }]
-      log(`👹 施放「${intent.buffType}」`)
+      if (intent.buffType === 'sanDrain') {
+        // 理智攻击
+        p.san = Math.max(0, p.san - (intent.buffAmount ?? 0))
+        log(`🖤 心素撕裂：理智 -${intent.buffAmount}（${p.san}/${p.maxSan}）`)
+      } else {
+        e.buffs = [...e.buffs, { type: intent.buffType!, amount: intent.buffAmount ?? 0, duration: 999 }]
+        log(`👹 施放「${intent.buffType}」`)
+      }
+    }
+
+    if (intent.type === 'heal' && intent.value) {
+      e.hp = Math.min(e.maxHp, e.hp + intent.value)
+      log(`🩸 黑莲绽放：恢复 ${intent.value} HP（${e.hp}/${e.maxHp}）`)
     }
 
     // 玩家死亡
@@ -572,14 +593,29 @@ export const useGameStore = create<GameState>()(
 
     // Boss 阶段切换
     if (e.def.phaseThreshold && e.hp <= e.def.phaseThreshold && (e.def.phase ?? 1) === 1) {
-      log(`⚠️ ${e.def.name} 进入狂暴阶段！攻击翻倍！`)
+      log(`⚠️ ${e.def.name} 进入狂暴阶段！`)
       // 更新Boss阶段
       e.def = { ...e.def, phase: 2 }
-      // 修改意图中的攻击值为2倍
-      const newIntents = e.def.intents.map(i =>
-        i.type === 'attack' ? { ...i, value: (i.value ?? 0) * 2 } : i
-      )
-      e.intent = newIntents[idx]
+      
+      // 黑莲老祖特殊处理：攻击+50%，使用特殊意图
+      if (e.def.id === 'black_lotus_ancestor') {
+        // 阶段2使用索引4-5的意图（heal和心素撕裂）
+        const phase2Intents = e.def.intents.slice(0, 4).map(i =>
+          i.type === 'attack' ? { ...i, value: Math.floor((i.value ?? 0) * 1.5) } : i
+        )
+        // 加入特殊意图
+        const specialIntents = e.def.intents.slice(4)
+        e.def = { ...e.def, intents: [...phase2Intents, ...specialIntents] }
+        e.intent = e.def.intents[idx % e.def.intents.length]
+        log(`🖤 黑莲老祖：黑莲绽放，心素撕裂！`)
+      } else {
+        // 其他Boss：攻击翻倍
+        const newIntents = e.def.intents.map(i =>
+          i.type === 'attack' ? { ...i, value: (i.value ?? 0) * 2 } : i
+        )
+        e.intent = newIntents[idx]
+      }
+      
       // 设置阶段切换动画标记
       set({ bossPhaseChange: true })
       // 1.5秒后清除动画标记
@@ -649,6 +685,14 @@ export const useGameStore = create<GameState>()(
     const player = { ...s.player }
     player.block = 0
     player.buffs = tickBuffs(player.buffs)
+    
+    // 第 4 层精英战后恢复效果（为 Boss 战做准备）
+    const currentNode = s.map?.nodes.find(n => n.id === s.selectedNodeId)
+    if (currentNode?.layer === 4 && currentNode?.type === 'elite') {
+      player.hp = Math.min(player.maxHp, player.hp + 15)
+      player.san = Math.min(player.maxSan, player.san + 10)
+      get().log(`🔥 战后恢复：HP +15，理智 +10（为 Boss 战做准备）`)
+    }
 
     set({
       phase: 'map',
@@ -680,6 +724,14 @@ export const useGameStore = create<GameState>()(
     const player = { ...s.player }
     player.block = 0
     player.buffs = tickBuffs(player.buffs)
+    
+    // 第 4 层精英战后恢复效果（为 Boss 战做准备）
+    const currentNode = s.map?.nodes.find(n => n.id === s.selectedNodeId)
+    if (currentNode?.layer === 4 && currentNode?.type === 'elite') {
+      player.hp = Math.min(player.maxHp, player.hp + 15)
+      player.san = Math.min(player.maxSan, player.san + 10)
+      get().log(`🔥 战后恢复：HP +15，理智 +10（为 Boss 战做准备）`)
+    }
 
     set({
       phase: 'map',
@@ -809,10 +861,20 @@ export const useGameStore = create<GameState>()(
         const bossDeck = shuffle([...ALL_CARDS, ...s.discardPile, ...s.drawPile, ...s.hand])
         const { drawn: bossHand, newDraw: bossDraw } = drawCards(bossDeck, [], 5)
         log(`👹 BOSS战：${node.enemyDef.name}！`)
+        
+        // 黑莲老祖特殊机制：黑莲诅咒
+        const bossPlayer = { ...s.player }
+        if (node.enemyDef.id === 'black_lotus_ancestor') {
+          // 开场施加黑莲诅咒（每回合-5理智）
+          bossPlayer.buffs = [...bossPlayer.buffs, { type: 'blackLotusCurse', amount: 5, duration: 999 }]
+          log(`🖤 黑莲诅咒：每回合理智 -5！`)
+        }
+        
         set({
           phase: 'player_turn',
           turn: 1,
           enemy: mkEnemy(node.enemyDef),
+          player: bossPlayer,
           drawPile: bossDraw,
           hand: bossHand,
           discardPile: [],

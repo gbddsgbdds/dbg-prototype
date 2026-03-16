@@ -332,6 +332,8 @@ body {
   min-height: 220px;
   flex-wrap: wrap;
   align-items: flex-end;
+  /* 卡牌动画基准点 */
+  perspective: 1000px;
 }
 
 .empty-hand { color: var(--text-dim); font-size: 0.9rem; padding: 2rem; }
@@ -349,6 +351,9 @@ body {
   cursor: pointer;
   transition: border-color 0.2s;
   position: relative;
+  /* 动画增强 */
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
 }
 
 .card.playable {
@@ -361,6 +366,22 @@ body {
 .card.attack { border-left: 4px solid var(--red); }
 .card.skill { border-left: 4px solid #74b9ff; }
 .card.power { border-left: 4px solid var(--purple); }
+
+/* 可打出卡牌脉冲效果 */
+.card.playable::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(88, 166, 255, 0.2), transparent);
+  animation: playablePulse 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes playablePulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.02); }
+}
 
 /* 入魔卡牌效果 */
 .madness-screen .card.playable {

@@ -4,7 +4,7 @@ export type CardClass = 'warrior' | 'puppet' | 'sorcerer' | 'firecraft'
 export type CardRarity = 'starter' | 'common' | 'uncommon' | 'rare' | 'legendary'
 export type EnemyType = 'normal' | 'elite' | 'boss'
 export type GamePhase = 'player_turn' | 'enemy_turn' | 'game_over' | 'victory' | 'madness' | 'map' | 'shop' | 'event'
-export type IntentType = 'attack' | 'defend' | 'buff' | 'debuff' | 'transform' | 'steal'
+export type IntentType = 'attack' | 'defend' | 'buff' | 'debuff' | 'transform' | 'steal' | 'heal'
 
 // 地图节点类型
 export type MapNodeType = 'battle' | 'elite' | 'rest' | 'shop' | 'event' | 'boss' | 'start'
