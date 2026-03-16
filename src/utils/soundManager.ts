@@ -168,6 +168,11 @@ class SoundManager {
   isEnabled() {
     return this.enabled
   }
+
+  // 获取当前音量
+  getVolume() {
+    return this.volume
+  }
 }
 
 // 音效类型

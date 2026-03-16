@@ -7,6 +7,7 @@ import { Enemy } from './components/Enemy'
 import { PlayerStatus } from './components/PlayerStatus'
 import { BattleLog } from './components/BattleLog'
 import { EnemyDamageFloat, PlayerDamageFloat } from './components/DamageFloat'
+import { SoundSettings } from './components/SoundSettings'
 import './App.css'
 
 // 懒加载非首屏组件
@@ -138,6 +139,7 @@ function App() {
   if (!map) {
     // 成就界面状态
     const [showAchievements, setShowAchievements] = useState(false)
+    const [showSoundSettings, setShowSoundSettings] = useState(false)
     const achievements = useMetaStore(s => s.achievements)
     const unlockedCount = achievements.filter(a => a.unlocked).length
     
@@ -154,6 +156,13 @@ function App() {
             <Suspense fallback={<LoadingFallback />}>
               <AchievementScreen onClose={() => setShowAchievements(false)} />
             </Suspense>
+          )}
+        </AnimatePresence>
+
+        {/* 音效设置界面 */}
+        <AnimatePresence>
+          {showSoundSettings && (
+            <SoundSettings onClose={() => setShowSoundSettings(false)} />
           )}
         </AnimatePresence>
       
@@ -218,6 +227,19 @@ function App() {
               transition={{ delay: hasSave ? 0.3 : 0.2 }}
             >
               🏆 成就 ({unlockedCount}/{achievements.length})
+            </motion.button>
+
+            {/* 音效设置按钮 */}
+            <motion.button
+              className="start-btn sound-btn"
+              onClick={() => setShowSoundSettings(true)}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: hasSave ? 0.4 : 0.3 }}
+            >
+              🔊 音效设置
             </motion.button>
           </div>
 

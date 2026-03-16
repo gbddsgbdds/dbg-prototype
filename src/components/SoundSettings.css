@@ -1,0 +1,226 @@
+/* 音效设置遮罩层 */
+.sound-settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* 设置面板 */
+.sound-settings-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 1.5rem;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* 头部 */
+.sound-settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sound-settings-header h2 {
+  font-size: 1.2rem;
+  color: var(--text);
+  margin: 0;
+}
+
+.sound-settings-header .close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.sound-settings-header .close-btn:hover {
+  background: var(--border);
+  color: var(--text);
+}
+
+/* 内容区域 */
+.sound-settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+/* 设置行 */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.setting-label {
+  color: var(--text);
+  font-size: 0.95rem;
+}
+
+/* 开关按钮 */
+.toggle-btn {
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+  min-width: 80px;
+}
+
+.toggle-btn.on {
+  background: rgba(63, 185, 80, 0.2);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.toggle-btn.off {
+  background: rgba(248, 81, 73, 0.1);
+  border-color: var(--red);
+  color: var(--red);
+}
+
+.toggle-btn:hover {
+  opacity: 0.9;
+}
+
+/* 音量控制 */
+.volume-row {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.volume-control {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.volume-slider {
+  flex: 1;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.volume-slider::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+
+.volume-slider:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.volume-value {
+  min-width: 45px;
+  text-align: right;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
+/* 测试按钮 */
+.test-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.test-btn:hover:not(:disabled) {
+  background: var(--border);
+}
+
+.test-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 底部提示 */
+.sound-settings-footer {
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.sound-settings-footer .hint {
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  text-align: center;
+  margin: 0;
+  opacity: 0.7;
+}
+
+/* 移动端适配 */
+@media (max-width: 400px) {
+  .sound-settings-panel {
+    padding: 1rem;
+    min-width: 280px;
+  }
+
+  .sound-settings-header h2 {
+    font-size: 1rem;
+  }
+
+  .setting-label {
+    font-size: 0.85rem;
+  }
+
+  .toggle-btn {
+    padding: 0.4rem 1rem;
+    font-size: 0.8rem;
+    min-width: 70px;
+  }
+
+  .test-btn {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+  }
+}
