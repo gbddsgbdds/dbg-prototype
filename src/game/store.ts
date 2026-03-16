@@ -230,7 +230,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     // 敌人死亡
     if (e.hp <= 0) {
       log(`🎉 击败 ${e.def.name}！`)
-      const hasMore = s.enemyQueue.length > 0
       set({
         player: p, enemy: e, hand, drawPile: dp, discardPile: disc,
         phase: 'victory',

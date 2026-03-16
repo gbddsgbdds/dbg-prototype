@@ -1,6 +1,4 @@
 export function getPlaceholderUrl(keyword: string, width = 160, height = 220): string {
-  // SVG 占位图，包含描述文字
-  const text = encodeURIComponent(keyword)
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
       <defs>
@@ -18,7 +16,6 @@ export function getPlaceholderUrl(keyword: string, width = 160, height = 220): s
 }
 
 export function getEnemyPlaceholderUrl(keyword: string, width = 200, height = 200): string {
-  const text = encodeURIComponent(keyword)
   const svg = `
     <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
       <defs>
