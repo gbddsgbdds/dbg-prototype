@@ -1,6 +1,24 @@
 import { create } from 'zustand'
-import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef } from './types'
-import { ALL_CARDS, REWARD_CARDS, JAW_WORM, GHOST, BLOOD_CORPSE } from '../data/cards'
+import { persist } from 'zustand/middleware'
+import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef, GameMap, MapNode, MapNodeType } from './types'
+import { ALL_CARDS, REWARD_CARDS, BLOOD_CORPSE, BOSS_ENEMY, ALL_ENEMIES } from '../data/cards'
+
+// ==================== 存档版本 ====================
+// 存档版本号 - 用于未来版本迁移
+// 当前版本: 0.3.0
+const SAVE_KEY = 'dbg-save'
+
+// 检查是否有存档
+export function hasSaveData(): boolean {
+  try {
+    const data = localStorage.getItem(SAVE_KEY)
+    if (!data) return false
+    const parsed = JSON.parse(data)
+    return parsed?.state?.map != null
+  } catch {
+    return false
+  }
+}
 
 // ==================== 工具函数 ====================
 
@@ -29,6 +47,116 @@ function calcDamage(base: number, shaqi: number, buffs: BuffEffect[], isMad: boo
   return Math.max(0, Math.floor(dmg))
 }
 
+// ==================== 地图生成 ====================
+
+const LAYER_COUNT = 4  // 普通层数
+const NODES_PER_LAYER = 4  // 每层节点数
+
+function generateMap(): GameMap {
+  const nodes: MapNode[] = []
+  let nodeId = 0
+
+  // 创建起始节点
+  const startId = `node_${nodeId++}`
+  nodes.push({
+    id: startId,
+    type: 'start',
+    layer: 0,
+    column: 1,
+    completed: true,
+    connections: [],
+  })
+
+  // 创建普通层节点
+  const layerNodes: string[][] = []  // 每层的节点ID列表
+  layerNodes[0] = [startId]
+
+  for (let layer = 1; layer <= LAYER_COUNT; layer++) {
+    layerNodes[layer] = []
+    const nodeCount = NODES_PER_LAYER
+
+    for (let col = 0; col < nodeCount; col++) {
+      const id = `node_${nodeId++}`
+      layerNodes[layer].push(id)
+
+      // 确定节点类型
+      let type: MapNodeType = 'battle'
+      if (layer === LAYER_COUNT) {
+        type = 'boss'
+      } else {
+        const roll = Math.random()
+        if (roll < 0.60) type = 'battle'
+        else if (roll < 0.75) type = 'rest'
+        else if (roll < 0.85) type = 'event'
+        else if (roll < 0.92) type = 'shop'
+        else type = 'elite'
+      }
+
+      // 为战斗节点预分配敌人
+      let enemyDef: EnemyDef | undefined
+      if (type === 'battle') {
+        enemyDef = shuffle([...ALL_ENEMIES])[0]
+      } else if (type === 'elite') {
+        enemyDef = BLOOD_CORPSE
+      } else if (type === 'boss') {
+        enemyDef = BOSS_ENEMY
+      }
+
+      nodes.push({
+        id,
+        type,
+        layer,
+        column: col,
+        completed: false,
+        connections: [],
+        enemyDef,
+      })
+    }
+  }
+
+  // 创建连接关系
+  for (let layer = 0; layer < LAYER_COUNT; layer++) {
+    const currentLayer = layerNodes[layer]
+    const nextLayer = layerNodes[layer + 1]
+
+    for (const nodeId of currentLayer) {
+      const node = nodes.find(n => n.id === nodeId)!
+      const nodeCol = node.column
+
+      if (layer === 0) {
+        // 起点连接到第一层的所有节点
+        node.connections = nextLayer.slice(0, 2)  // 连接到前两个节点
+      } else if (layer < LAYER_COUNT) {
+        // 每个节点连接下一层的1-2个相邻节点
+        const possibleNext: string[] = []
+
+        // 连接到同列和相邻列的节点
+        for (const nextId of nextLayer) {
+          const nextNode = nodes.find(n => n.id === nextId)!
+          const colDiff = Math.abs(nextNode.column - nodeCol)
+          if (colDiff <= 1) {
+            possibleNext.push(nextId)
+          }
+        }
+
+        // 随机选择1-2个连接
+        const shuffled = shuffle(possibleNext)
+        node.connections = shuffled.slice(0, Math.min(2, shuffled.length))
+      }
+    }
+  }
+
+  // Boss节点ID
+  const bossNodeId = layerNodes[LAYER_COUNT][0]
+
+  return {
+    nodes,
+    layers: LAYER_COUNT + 1,
+    startNodeId: startId,
+    bossNodeId,
+  }
+}
+
 // ==================== Store ====================
 
 interface GameState {
@@ -46,14 +174,26 @@ interface GameState {
   rewardCards: CardDef[] | null
   exorcismMode: boolean  // 驱魔符选择模式
   bossPhaseChange: boolean  // Boss阶段切换动画标记
+  // 地图系统
+  map: GameMap | null
+  currentNodeId: string | null
+  selectedNodeId: string | null  // 正在进入的节点
+  // 战斗后奖励金币
+  goldReward: number
+  // 方法
   log: (msg: string) => void
   newGame: () => void
+  clearSave: () => void  // 清除存档
   playCard: (index: number) => void
   endPlayerTurn: () => void
   nextEnemy: () => void
   addCard: (card: CardDef) => void
   skipReward: () => void
   useExorcismTalisman: (index: number) => void  // 驱魔符翻面
+  // 地图相关方法
+  selectNode: (nodeId: string) => void
+  enterNode: () => void
+  returnToMap: () => void
 }
 
 function mkPlayer(): PlayerState {
@@ -85,36 +225,57 @@ function drawCards(drawPile: CardDef[], discardPile: CardDef[], count: number): 
   return { drawn, newDraw: dp, newDiscard: disc }
 }
 
-export const useGameStore = create<GameState>((set, get) => ({
-  phase: 'player_turn',
-  turn: 1,
-  player: mkPlayer(),
-  enemy: null,
-  enemyQueue: [],
-  drawPile: [],
-  hand: [],
-  discardPile: [],
-  exhaustPile: [],
-  battleLog: [],
-  animating: false,
-  rewardCards: null,
-  exorcismMode: false,
-  bossPhaseChange: false,
+export const useGameStore = create<GameState>()(
+  persist(
+    (set, get) => ({
+      phase: 'map',
+      turn: 1,
+      player: mkPlayer(),
+      enemy: null,
+      enemyQueue: [],
+      drawPile: [],
+      hand: [],
+      discardPile: [],
+      exhaustPile: [],
+      battleLog: [],
+      animating: false,
+      rewardCards: null,
+      exorcismMode: false,
+      bossPhaseChange: false,
+      map: null,
+      currentNodeId: null,
+      selectedNodeId: null,
+      goldReward: 0,
 
   log: (msg: string) => set(s => ({ battleLog: [...s.battleLog.slice(-50), msg] })),
 
   newGame: () => {
-    const enemies = shuffle([JAW_WORM, GHOST, BLOOD_CORPSE])
-    const first = enemies[0]
-    const deck = shuffle([...ALL_CARDS])
-    const { drawn, newDraw } = drawCards(deck, [], 5)
+    const newMap = generateMap()
     set({
-      phase: 'player_turn', turn: 1, player: mkPlayer(),
-      enemy: mkEnemy(first), enemyQueue: enemies.slice(1),
-      drawPile: newDraw, hand: drawn, discardPile: [], exhaustPile: [],
-      battleLog: [`⚔️ 遭遇 ${first.name}！HP: ${first.hp}`],
-      animating: false, rewardCards: null, exorcismMode: false, bossPhaseChange: false,
+      phase: 'map',
+      turn: 1,
+      player: mkPlayer(),
+      enemy: null,
+      enemyQueue: [],
+      drawPile: [],
+      hand: [],
+      discardPile: [],
+      exhaustPile: [],
+      battleLog: [],
+      animating: false,
+      rewardCards: null,
+      exorcismMode: false,
+      bossPhaseChange: false,
+      map: newMap,
+      currentNodeId: newMap.startNodeId,
+      selectedNodeId: null,
+      goldReward: 0,
     })
+  },
+
+  clearSave: () => {
+    // 清除 localStorage 中的存档
+    localStorage.removeItem(SAVE_KEY)
   },
 
   playCard: (index: number) => {
@@ -268,6 +429,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     // 敌人死亡
     if (e.hp <= 0) {
       log(`🎉 击败 ${e.def.name}！`)
+      // 获得金币奖励
+      p.gold += s.goldReward
+      log(`💰 获得 ${s.goldReward} 金币（共 ${p.gold}）`)
       set({
         player: p, enemy: e, hand, drawPile: dp, discardPile: disc,
         phase: 'victory',
@@ -436,14 +600,63 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   addCard: (card: CardDef) => {
     const s = get()
+    // 标记当前节点完成
+    let updatedMap = s.map
+    let newNodeId = s.currentNodeId
+    if (s.map && s.selectedNodeId) {
+      updatedMap = {
+        ...s.map,
+        nodes: s.map.nodes.map(n =>
+          n.id === s.selectedNodeId ? { ...n, completed: true } : n
+        )
+      }
+      newNodeId = s.selectedNodeId
+    }
+
+    const player = { ...s.player }
+    player.block = 0
+    player.buffs = tickBuffs(player.buffs)
+
     set({
+      phase: 'map',
+      map: updatedMap,
+      currentNodeId: newNodeId,
+      selectedNodeId: null,
       discardPile: [...s.discardPile, card],
       rewardCards: null,
+      enemy: null,
+      player,
     })
   },
 
   skipReward: () => {
-    set({ rewardCards: null })
+    const s = get()
+    // 标记当前节点完成
+    let updatedMap = s.map
+    let newNodeId = s.currentNodeId
+    if (s.map && s.selectedNodeId) {
+      updatedMap = {
+        ...s.map,
+        nodes: s.map.nodes.map(n =>
+          n.id === s.selectedNodeId ? { ...n, completed: true } : n
+        )
+      }
+      newNodeId = s.selectedNodeId
+    }
+
+    const player = { ...s.player }
+    player.block = 0
+    player.buffs = tickBuffs(player.buffs)
+
+    set({
+      phase: 'map',
+      map: updatedMap,
+      currentNodeId: newNodeId,
+      selectedNodeId: null,
+      rewardCards: null,
+      enemy: null,
+      player,
+    })
   },
 
   useExorcismTalisman: (index: number) => {
@@ -466,4 +679,157 @@ export const useGameStore = create<GameState>((set, get) => ({
       get().log(`🔮 驱魔符揭示：「${card.name}」是真牌，可以正常使用`)
     }
   },
-}))
+
+  // ========== 地图系统方法 ==========
+
+  selectNode: (nodeId: string) => {
+    const s = get()
+    if (!s.map || s.phase !== 'map') return
+
+    const node = s.map.nodes.find(n => n.id === nodeId)
+    if (!node || node.completed) return
+
+    // 检查是否是可达节点
+    const currentNode = s.map.nodes.find(n => n.id === s.currentNodeId)
+    if (currentNode && !currentNode.connections.includes(nodeId)) return
+
+    set({ selectedNodeId: nodeId })
+  },
+
+  enterNode: () => {
+    const s = get()
+    if (!s.map || !s.selectedNodeId || s.phase !== 'map') return
+
+    const node = s.map.nodes.find(n => n.id === s.selectedNodeId)
+    if (!node) return
+
+    const log = get().log
+
+    // 根据节点类型进入不同场景
+    switch (node.type) {
+      case 'battle':
+      case 'elite':
+        if (!node.enemyDef) return
+        const deck = shuffle([...ALL_CARDS, ...s.discardPile, ...s.drawPile, ...s.hand])
+        const { drawn, newDraw } = drawCards(deck, [], 5)
+        log(`⚔️ 遭遇 ${node.enemyDef.name}！HP: ${node.enemyDef.hp}`)
+        set({
+          phase: 'player_turn',
+          turn: 1,
+          enemy: mkEnemy(node.enemyDef),
+          drawPile: newDraw,
+          hand: drawn,
+          discardPile: [],
+          goldReward: node.type === 'elite' ? 30 : 15,
+        })
+        break
+
+      case 'rest':
+        // 篝火：恢复HP和理智
+        const restedPlayer = { ...s.player }
+        restedPlayer.hp = Math.min(restedPlayer.maxHp, restedPlayer.hp + 20)
+        restedPlayer.san = Math.min(restedPlayer.maxSan, restedPlayer.san + 15)
+        log(`🔥 篝火休息：HP +20，理智 +15`)
+        // 标记节点完成
+        const restedMap = { ...s.map, nodes: s.map.nodes.map(n => n.id === node.id ? { ...n, completed: true } : n) }
+        set({
+          player: restedPlayer,
+          map: restedMap,
+          currentNodeId: node.id,
+          selectedNodeId: null,
+          battleLog: [...s.battleLog, '🔥 在篝火旁休息...'],
+        })
+        break
+
+      case 'shop':
+        // 商店：占位实现，暂时标记完成
+        log(`🏪 商店：暂未开放，敬请期待`)
+        const shopMap = { ...s.map, nodes: s.map.nodes.map(n => n.id === node.id ? { ...n, completed: true } : n) }
+        set({
+          map: shopMap,
+          currentNodeId: node.id,
+          selectedNodeId: null,
+          battleLog: [...s.battleLog, '🏪 商店暂未开放...'],
+        })
+        break
+
+      case 'event':
+        // 事件：占位实现，暂时标记完成
+        log(`❓ 神秘事件：暂未开放，敬请期待`)
+        const eventMap = { ...s.map, nodes: s.map.nodes.map(n => n.id === node.id ? { ...n, completed: true } : n) }
+        set({
+          map: eventMap,
+          currentNodeId: node.id,
+          selectedNodeId: null,
+          battleLog: [...s.battleLog, '❓ 神秘事件暂未开放...'],
+        })
+        break
+
+      case 'boss':
+        if (!node.enemyDef) return
+        const bossDeck = shuffle([...ALL_CARDS, ...s.discardPile, ...s.drawPile, ...s.hand])
+        const { drawn: bossHand, newDraw: bossDraw } = drawCards(bossDeck, [], 5)
+        log(`👹 BOSS战：${node.enemyDef.name}！`)
+        set({
+          phase: 'player_turn',
+          turn: 1,
+          enemy: mkEnemy(node.enemyDef),
+          drawPile: bossDraw,
+          hand: bossHand,
+          discardPile: [],
+          goldReward: 50,
+        })
+        break
+    }
+  },
+
+  returnToMap: () => {
+    const s = get()
+    if (!s.map) return
+
+    // 标记当前节点完成
+    const completedNodeId = s.selectedNodeId || s.currentNodeId
+    const updatedMap = {
+      ...s.map,
+      nodes: s.map.nodes.map(n =>
+        n.id === completedNodeId ? { ...n, completed: true } : n
+      )
+    }
+
+    const player = { ...s.player }
+    player.block = 0
+    player.buffs = tickBuffs(player.buffs)
+
+    set({
+      phase: 'map',
+      map: updatedMap,
+      currentNodeId: completedNodeId,
+      selectedNodeId: null,
+      enemy: null,
+      rewardCards: null,
+      player,
+    })
+  },
+}),
+    {
+      name: SAVE_KEY,
+      version: 1,
+      partialize: (state) => ({
+        phase: state.phase,
+        turn: state.turn,
+        player: state.player,
+        enemy: state.enemy,
+        enemyQueue: state.enemyQueue,
+        drawPile: state.drawPile,
+        hand: state.hand,
+        discardPile: state.discardPile,
+        exhaustPile: state.exhaustPile,
+        battleLog: state.battleLog,
+        map: state.map,
+        currentNodeId: state.currentNodeId,
+        selectedNodeId: state.selectedNodeId,
+        goldReward: state.goldReward,
+      }),
+    }
+  )
+)

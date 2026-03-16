@@ -66,6 +66,23 @@ body {
 }
 .start-btn:hover { box-shadow: 0 0 20px rgba(248,81,73,0.4); }
 
+/* 开始按钮区域 */
+.start-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+}
+
+.start-btn.continue {
+  background: linear-gradient(135deg, #1a4a2e, #0e3a4e);
+  border-color: var(--green);
+}
+
+.start-btn.continue:hover {
+  box-shadow: 0 0 20px rgba(63, 185, 80, 0.4);
+}
+
 /* === 游戏容器 === */
 .game-container {
   display: grid;
@@ -836,5 +853,73 @@ body {
   text-align: center;
   color: var(--text-dim);
   padding: 2rem;
+}
+
+/* === 地图界面包装器 === */
+.game-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* === 地图界面底部状态栏 === */
+.map-player-status {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 0.8rem;
+  background: rgba(19, 19, 26, 0.95);
+  border-top: 1px solid var(--border);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.5rem 1rem;
+  background: var(--surface2);
+  border-radius: 8px;
+  min-width: 80px;
+}
+
+.status-item.hp {
+  border: 1px solid #f85149;
+}
+
+.status-item.san {
+  border: 1px solid var(--purple);
+}
+
+.status-item.gold {
+  border: 1px solid var(--gold);
+}
+
+.status-label {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+}
+
+.status-value {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: var(--text);
+}
+
+.status-item.hp .status-value {
+  color: #f85149;
+}
+
+.status-item.san .status-value {
+  color: var(--purple);
+}
+
+.status-item.gold .status-value {
+  color: var(--gold);
 }
 
