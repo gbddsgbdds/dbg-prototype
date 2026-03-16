@@ -9,6 +9,7 @@ export function Enemy() {
 
   const hpPct = (enemy.hp / enemy.maxHp) * 100
   const isMad = player?.isMad ?? false
+  const isEnraged = enemy.def.type === 'boss' && (enemy.def.phase ?? 1) >= 2
 
   const intentLabel = () => {
     const i = enemy.intent
@@ -42,19 +43,22 @@ export function Enemy() {
     <div className="enemy-area">
       <motion.div
         className="enemy-intent"
-        animate={isMad ? { scale: [1, 1.2, 1], color: '#ff0000' } : { scale: [1, 1.1, 1] }}
-        transition={{ repeat: Infinity, duration: isMad ? 0.5 : 2 }}
+        animate={isMad ? { scale: [1, 1.2, 1], color: '#ff0000' } : isEnraged ? { scale: [1, 1.15, 1], color: '#ff6600' } : { scale: [1, 1.1, 1] }}
+        transition={{ repeat: Infinity, duration: isMad ? 0.5 : isEnraged ? 0.8 : 2 }}
       >
         {intentLabel()}
       </motion.div>
       <motion.div
-        className={`enemy ${enemy.hp <= 0 ? 'dead' : ''}`}
-        animate={enemy.hp <= 0 ? { scale: 0, rotate: 180, opacity: 0 } : isMad ? { x: [0, -2, 2, 0] } : {}}
-        transition={isMad ? { repeat: Infinity, duration: 0.1 } : {}}
+        className={`enemy ${enemy.hp <= 0 ? 'dead' : ''} ${isEnraged ? 'boss-enraged' : ''}`}
+        animate={enemy.hp <= 0 ? { scale: 0, rotate: 180, opacity: 0 } : isMad ? { x: [0, -2, 2, 0] } : isEnraged ? { scale: [1, 1.03, 1] } : {}}
+        transition={isMad ? { repeat: Infinity, duration: 0.1 } : isEnraged ? { repeat: Infinity, duration: 0.3 } : {}}
       >
         <img src={getEnemyPlaceholderUrl(enemy.def.icon || enemy.def.name)} alt={enemy.def.name} />
       </motion.div>
-      <div className="enemy-name">{enemy.def.name}{enemyTypeLabel()}</div>
+      <div className="enemy-name">
+        {enemy.def.name}{enemyTypeLabel()}
+        {isEnraged && <span className="enraged-badge"> 狂暴</span>}
+      </div>
       <div className="hp-bar enemy-hp">
         <div className="hp-fill enemy-hp-fill" style={{ width: `${hpPct}%` }} />
         <span className="hp-text">{enemy.hp} / {enemy.maxHp}</span>

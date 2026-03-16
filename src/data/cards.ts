@@ -288,10 +288,11 @@ const DAN_YANGZI: EnemyDef = {
 
 export const ALL_CARDS: CardDef[] = [
   STRIKE, STRIKE, STRIKE, STRIKE,
-  GUARD, GUARD, GUARD, GUARD, GUARD,
+  GUARD, GUARD, GUARD, GUARD,
   WILD_SLASH,
   NUO_MASK,
   HEAVY_STRIKE,
+  EXORCISM_TALISMAN,  // 初始携带一张驱魔符
 ]
 
 export const REWARD_CARDS: CardDef[] = [

@@ -45,6 +45,7 @@ interface GameState {
   animating: boolean
   rewardCards: CardDef[] | null
   exorcismMode: boolean  // 驱魔符选择模式
+  bossPhaseChange: boolean  // Boss阶段切换动画标记
   log: (msg: string) => void
   newGame: () => void
   playCard: (index: number) => void
@@ -98,6 +99,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   animating: false,
   rewardCards: null,
   exorcismMode: false,
+  bossPhaseChange: false,
 
   log: (msg: string) => set(s => ({ battleLog: [...s.battleLog.slice(-50), msg] })),
 
@@ -111,7 +113,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       enemy: mkEnemy(first), enemyQueue: enemies.slice(1),
       drawPile: newDraw, hand: drawn, discardPile: [], exhaustPile: [],
       battleLog: [`⚔️ 遭遇 ${first.name}！HP: ${first.hp}`],
-      animating: false, rewardCards: null, exorcismMode: false,
+      animating: false, rewardCards: null, exorcismMode: false, bossPhaseChange: false,
     })
   },
 
@@ -221,15 +223,14 @@ export const useGameStore = create<GameState>((set, get) => ({
       log(`🔥🔥🔥 走火入魔！所有伤害 ×3！`)
     }
 
-    // 驱魔符 - 进入选择模式而非直接消耗
+    // 驱魔符 - 进入选择模式，揭示一张牌的真伪
     if (card.id === 'exorcism_talisman') {
-      // 不消耗手牌，进入选择模式
-      // 先把卡从手牌移除加到消耗堆
-      hand.splice(index, 1)
+      // 驱魔符进入弃牌堆
+      disc.push(card)
       set({
         player: p, hand, drawPile: dp, discardPile: disc, exorcismMode: true,
       })
-      log(`🔍 使用驱魔符...请选择一张要查看的牌`)
+      log(`🔮 使用驱魔符...请选择一张要揭示的牌`)
       return
     }
 
@@ -373,13 +374,19 @@ export const useGameStore = create<GameState>((set, get) => ({
     e.intent = e.def.intents[idx]
 
     // Boss 阶段切换
-    if (e.def.phaseThreshold && e.hp <= e.def.phaseThreshold) {
+    if (e.def.phaseThreshold && e.hp <= e.def.phaseThreshold && (e.def.phase ?? 1) === 1) {
       log(`⚠️ ${e.def.name} 进入狂暴阶段！攻击翻倍！`)
+      // 更新Boss阶段
+      e.def = { ...e.def, phase: 2 }
       // 修改意图中的攻击值为2倍
       const newIntents = e.def.intents.map(i =>
         i.type === 'attack' ? { ...i, value: (i.value ?? 0) * 2 } : i
       )
       e.intent = newIntents[idx]
+      // 设置阶段切换动画标记
+      set({ bossPhaseChange: true })
+      // 1.5秒后清除动画标记
+      setTimeout(() => set({ bossPhaseChange: false }), 1500)
     }
 
     const { drawn, newDraw, newDiscard } = drawCards(dp, disc, 5)
@@ -441,10 +448,22 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   useExorcismTalisman: (index: number) => {
     const s = get()
+    if (!s.exorcismMode) return
     const card = s.hand[index]
     if (!card) return
-    const log = get().log
-    log(`🔍 驱魔符：翻开第 ${index + 1} 张牌`)
-    // TODO: 实现幻觉牌翻面逻辑
+    const hand = [...s.hand]
+    const isHall = card.isHallucination || false
+    // 揭示：移除幻觉标记，显示真实卡牌
+    hand[index] = { ...card, isHallucination: false }
+    set({ hand, exorcismMode: false })
+    // 日志显示真伪
+    if (isHall) {
+      get().log(`🔮 驱魔符揭示：「${card.name}」是幻觉！它消失了...`)
+      // 幻觉牌被揭示后直接移除（从手牌中删除）
+      hand.splice(index, 1)
+      set({ hand })
+    } else {
+      get().log(`🔮 驱魔符揭示：「${card.name}」是真牌，可以正常使用`)
+    }
   },
 }))
