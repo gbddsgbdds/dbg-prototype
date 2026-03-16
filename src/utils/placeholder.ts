@@ -24,13 +24,10 @@ const RARITY_COLORS: Record<string, string> = {
  * 优先使用预生成的静态 SVG，不存在则动态生成
  */
 export function getPlaceholderUrl(keyword: string, _width = 160, _height = 220): string {
-  // 尝试使用预生成的静态图片
+  // 使用预生成的静态图片
   const cardId = keyword.toLowerCase().replace(/\s+/g, '_')
-  const staticUrl = `/cards/${cardId}.svg`
-
-  // 返回静态图片路径（浏览器会自动处理 404）
-  // 如果需要回退到动态生成，可以在这里添加逻辑
-  return staticUrl
+  const base = import.meta.env.BASE_URL || '/'
+  return `${base}cards/${cardId}.svg`
 }
 
 /**
@@ -38,11 +35,10 @@ export function getPlaceholderUrl(keyword: string, _width = 160, _height = 220):
  * 优先使用预生成的静态 SVG
  */
 export function getEnemyPlaceholderUrl(keyword: string, _width = 200, _height = 200): string {
-  // 尝试使用预生成的静态图片
+  // 使用预生成的静态图片
   const enemyId = keyword.toLowerCase().replace(/\s+/g, '_')
-  const staticUrl = `/enemies/${enemyId}.svg`
-
-  return staticUrl
+  const base = import.meta.env.BASE_URL || '/'
+  return `${base}enemies/${enemyId}.svg`
 }
 
 /**
