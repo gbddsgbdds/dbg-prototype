@@ -3,11 +3,40 @@ export type CardType = 'attack' | 'skill' | 'power'
 export type CardClass = 'warrior' | 'puppet' | 'sorcerer' | 'firecraft'
 export type CardRarity = 'starter' | 'common' | 'uncommon' | 'rare' | 'legendary'
 export type EnemyType = 'normal' | 'elite' | 'boss'
-export type GamePhase = 'player_turn' | 'enemy_turn' | 'game_over' | 'victory' | 'madness' | 'map'
+export type GamePhase = 'player_turn' | 'enemy_turn' | 'game_over' | 'victory' | 'madness' | 'map' | 'shop' | 'event'
 export type IntentType = 'attack' | 'defend' | 'buff' | 'debuff' | 'transform' | 'steal'
 
 // 地图节点类型
 export type MapNodeType = 'battle' | 'elite' | 'rest' | 'shop' | 'event' | 'boss' | 'start'
+
+// 商店物品
+export interface ShopItem {
+  card: CardDef
+  price: number
+  sold: boolean
+}
+
+// 事件选项
+export interface EventChoice {
+  text: string
+  effects: {
+    hp?: number
+    san?: number
+    gold?: number
+    shaqi?: number
+    addCard?: CardDef
+    removeRandomCard?: boolean
+  }
+}
+
+// 游戏事件
+export interface GameEvent {
+  id: string
+  title: string
+  description: string
+  choices?: EventChoice[]  // 有选项的事件
+  autoEffects?: EventChoice['effects']  // 无选项，自动触发
+}
 
 // 地图节点
 export interface MapNode {

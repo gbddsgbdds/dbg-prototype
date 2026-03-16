@@ -1,0 +1,251 @@
+.shop-screen {
+  padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.shop-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.shop-header h2 {
+  margin: 0;
+  color: #ffd700;
+  text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.player-gold {
+  font-size: 1.2rem;
+  color: #ffd700;
+  background: rgba(255, 215, 0, 0.1);
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 215, 0, 0.3);
+}
+
+.shop-section {
+  margin-bottom: 32px;
+}
+
+.shop-section h3 {
+  color: #e0e0e0;
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+}
+
+.remove-cost {
+  color: #888;
+  font-weight: normal;
+  font-size: 0.9rem;
+}
+
+.shop-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.shop-card {
+  background: linear-gradient(145deg, #2a2a3a 0%, #1a1a2a 100%);
+  border: 2px solid #444;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.shop-card.affordable {
+  border-color: #4ade80;
+  box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+}
+
+.shop-card.sold {
+  opacity: 0.5;
+  border-color: #666;
+}
+
+.shop-card:hover:not(.sold) {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-cost {
+  background: linear-gradient(145deg, #3a3a4a, #2a2a3a);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #fff;
+  border: 1px solid #555;
+}
+
+.card-name {
+  flex: 1;
+  font-weight: bold;
+  color: #fff;
+  font-size: 1rem;
+}
+
+.card-rarity {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.card-type {
+  font-size: 0.8rem;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.card-desc {
+  color: #bbb;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.card-price {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+  font-size: 1.1rem;
+}
+
+.price-coin {
+  font-size: 1.2rem;
+}
+
+.price-value {
+  color: #ffd700;
+  font-weight: bold;
+}
+
+.sold-text {
+  color: #888;
+  font-style: italic;
+}
+
+.buy-btn {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: linear-gradient(145deg, #4ade80, #22c55e);
+  color: #000;
+}
+
+.buy-btn:hover:not(:disabled) {
+  transform: scale(1.02);
+  box-shadow: 0 4px 15px rgba(74, 222, 128, 0.4);
+}
+
+.buy-btn:disabled {
+  background: #555;
+  color: #888;
+  cursor: not-allowed;
+}
+
+/* 移除卡牌区域 */
+.remove-section {
+  background: rgba(255, 100, 100, 0.05);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 100, 100, 0.2);
+}
+
+.remove-hint {
+  color: #888;
+  font-style: italic;
+}
+
+.remove-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.remove-card-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: rgba(255, 100, 100, 0.1);
+  border: 1px solid rgba(255, 100, 100, 0.3);
+  border-radius: 8px;
+  color: #ff6b6b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.remove-card-btn:hover {
+  background: rgba(255, 100, 100, 0.2);
+  border-color: #ff6b6b;
+}
+
+.remove-card-btn .card-count {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* 离开按钮 */
+.shop-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.leave-btn {
+  padding: 12px 40px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  background: linear-gradient(145deg, #3a3a4a, #2a2a3a);
+  border: 2px solid #555;
+  border-radius: 12px;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.leave-btn:hover {
+  background: linear-gradient(145deg, #4a4a5a, #3a3a4a);
+  border-color: #888;
+}
+
+/* 响应式 */
+@media (max-width: 600px) {
+  .shop-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .shop-header {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+}

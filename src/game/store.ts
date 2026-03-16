@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef, GameMap, MapNode, MapNodeType } from './types'
+import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef, GameMap, MapNode, MapNodeType, ShopItem, GameEvent } from './types'
 import { ALL_CARDS, REWARD_CARDS, BLOOD_CORPSE, BOSS_ENEMY, ALL_ENEMIES } from '../data/cards'
+import { getRandomEvent } from '../data/events'
 
 // ==================== 存档版本 ====================
 // 存档版本号 - 用于未来版本迁移
@@ -180,6 +181,11 @@ interface GameState {
   selectedNodeId: string | null  // 正在进入的节点
   // 战斗后奖励金币
   goldReward: number
+  // 商店系统
+  shopItems: ShopItem[] | null
+  removeCost: number  // 移除卡牌费用
+  // 事件系统
+  currentEvent: GameEvent | null
   // 方法
   log: (msg: string) => void
   newGame: () => void
@@ -194,6 +200,13 @@ interface GameState {
   selectNode: (nodeId: string) => void
   enterNode: () => void
   returnToMap: () => void
+  // 商店方法
+  buyCard: (index: number) => void
+  removeCard: (cardId: string) => void
+  leaveShop: () => void
+  // 事件方法
+  chooseEventOption: (choiceIndex: number) => void
+  confirmAutoEvent: () => void
 }
 
 function mkPlayer(): PlayerState {
@@ -246,6 +259,9 @@ export const useGameStore = create<GameState>()(
       currentNodeId: null,
       selectedNodeId: null,
       goldReward: 0,
+      shopItems: null,
+      removeCost: 50,
+      currentEvent: null,
 
   log: (msg: string) => set(s => ({ battleLog: [...s.battleLog.slice(-50), msg] })),
 
@@ -270,6 +286,8 @@ export const useGameStore = create<GameState>()(
       currentNodeId: newMap.startNodeId,
       selectedNodeId: null,
       goldReward: 0,
+      shopItems: null,
+      currentEvent: null,
     })
   },
 
@@ -742,26 +760,28 @@ export const useGameStore = create<GameState>()(
         break
 
       case 'shop':
-        // 商店：占位实现，暂时标记完成
-        log(`🏪 商店：暂未开放，敬请期待`)
-        const shopMap = { ...s.map, nodes: s.map.nodes.map(n => n.id === node.id ? { ...n, completed: true } : n) }
+        // 商店：生成商品
+        const shopCards = shuffle([...REWARD_CARDS]).slice(0, 4)
+        const items: ShopItem[] = shopCards.map(card => ({
+          card,
+          price: card.rarity === 'common' ? 50 : card.rarity === 'uncommon' ? 75 : 100,
+          sold: false,
+        }))
+        log(`🏪 进入商店，有 ${items.length} 张卡牌出售`)
         set({
-          map: shopMap,
-          currentNodeId: node.id,
-          selectedNodeId: null,
-          battleLog: [...s.battleLog, '🏪 商店暂未开放...'],
+          phase: 'shop',
+          shopItems: items,
+          removeCost: 50 + Math.floor(Math.random() * 30),
         })
         break
 
       case 'event':
-        // 事件：占位实现，暂时标记完成
-        log(`❓ 神秘事件：暂未开放，敬请期待`)
-        const eventMap = { ...s.map, nodes: s.map.nodes.map(n => n.id === node.id ? { ...n, completed: true } : n) }
+        // 事件：随机触发
+        const event = getRandomEvent()
+        log(`❓ 触发事件：${event.title}`)
         set({
-          map: eventMap,
-          currentNodeId: node.id,
-          selectedNodeId: null,
-          battleLog: [...s.battleLog, '❓ 神秘事件暂未开放...'],
+          phase: 'event',
+          currentEvent: event,
         })
         break
 
@@ -808,7 +828,196 @@ export const useGameStore = create<GameState>()(
       enemy: null,
       rewardCards: null,
       player,
+      shopItems: null,
+      currentEvent: null,
     })
+  },
+
+  // ========== 商店系统方法 ==========
+
+  buyCard: (index: number) => {
+    const s = get()
+    if (!s.shopItems || s.phase !== 'shop') return
+
+    const item = s.shopItems[index]
+    if (!item || item.sold || s.player.gold < item.price) {
+      get().log(`💰 金币不足！`)
+      return
+    }
+
+    const player = { ...s.player, gold: s.player.gold - item.price }
+    const shopItems = [...s.shopItems]
+    shopItems[index] = { ...item, sold: true }
+
+    get().log(`💰 购买了「${item.card.name}」，花费 ${item.price} 金币`)
+    set({
+      player,
+      shopItems,
+      discardPile: [...s.discardPile, item.card],
+    })
+  },
+
+  removeCard: (cardId: string) => {
+    const s = get()
+    if (s.phase !== 'shop' || s.player.gold < s.removeCost) {
+      get().log(`💰 移除卡牌需要 ${s.removeCost} 金币！`)
+      return
+    }
+
+    // 从弃牌堆、抽牌堆或手牌中移除
+    let removed = false
+    let newDiscard = [...s.discardPile]
+    let newDraw = [...s.drawPile]
+    let newHand = [...s.hand]
+
+    // 优先从弃牌堆移除
+    const discardIdx = newDiscard.findIndex(c => c.id === cardId)
+    if (discardIdx >= 0) {
+      newDiscard.splice(discardIdx, 1)
+      removed = true
+    } else {
+      // 从抽牌堆移除
+      const drawIdx = newDraw.findIndex(c => c.id === cardId)
+      if (drawIdx >= 0) {
+        newDraw.splice(drawIdx, 1)
+        removed = true
+      } else {
+        // 从手牌移除
+        const handIdx = newHand.findIndex(c => c.id === cardId)
+        if (handIdx >= 0) {
+          newHand.splice(handIdx, 1)
+          removed = true
+        }
+      }
+    }
+
+    if (removed) {
+      const player = { ...s.player, gold: s.player.gold - s.removeCost }
+      get().log(`🗑️ 移除了一张卡牌，花费 ${s.removeCost} 金币`)
+      set({ player, discardPile: newDiscard, drawPile: newDraw, hand: newHand })
+    }
+  },
+
+  leaveShop: () => {
+    const s = get()
+    if (!s.map || !s.selectedNodeId) return
+
+    const updatedMap = {
+      ...s.map,
+      nodes: s.map.nodes.map(n =>
+        n.id === s.selectedNodeId ? { ...n, completed: true } : n
+      )
+    }
+
+    get().log(`🏪 离开商店`)
+    set({
+      phase: 'map',
+      map: updatedMap,
+      currentNodeId: s.selectedNodeId,
+      selectedNodeId: null,
+      shopItems: null,
+    })
+  },
+
+  // ========== 事件系统方法 ==========
+
+  chooseEventOption: (choiceIndex: number) => {
+    const s = get()
+    if (!s.currentEvent || s.phase !== 'event') return
+    if (!s.currentEvent.choices || choiceIndex >= s.currentEvent.choices.length) return
+
+    const choice = s.currentEvent.choices[choiceIndex]
+    const player = { ...s.player }
+    const effects = choice.effects
+    const log = get().log
+
+    // 应用效果
+    if (effects.hp) {
+      player.hp = Math.max(1, Math.min(player.maxHp, player.hp + effects.hp))
+      log(`❤️ HP ${effects.hp > 0 ? '+' : ''}${effects.hp}（${player.hp}/${player.maxHp}）`)
+    }
+    if (effects.san) {
+      player.san = Math.max(0, Math.min(player.maxSan, player.san + effects.san))
+      log(`🧠 理智 ${effects.san > 0 ? '+' : ''}${effects.san}（${player.san}/${player.maxSan}）`)
+    }
+    if (effects.gold) {
+      player.gold = Math.max(0, player.gold + effects.gold)
+      log(`💰 金币 ${effects.gold > 0 ? '+' : ''}${effects.gold}（${player.gold}）`)
+    }
+    if (effects.shaqi) {
+      player.shaqi = Math.max(0, Math.min(player.maxShaqi, player.shaqi + effects.shaqi))
+      log(`🔥 煞气 ${effects.shaqi > 0 ? '+' : ''}${effects.shaqi}（${player.shaqi}）`)
+    }
+    if (effects.addCard) {
+      log(`🃏 获得卡牌「${effects.addCard.name}」`)
+    }
+
+    // 标记节点完成，返回地图
+    if (s.map && s.selectedNodeId) {
+      const updatedMap = {
+        ...s.map,
+        nodes: s.map.nodes.map(n =>
+          n.id === s.selectedNodeId ? { ...n, completed: true } : n
+        )
+      }
+
+      set({
+        phase: 'map',
+        player,
+        map: updatedMap,
+        currentNodeId: s.selectedNodeId,
+        selectedNodeId: null,
+        currentEvent: null,
+        discardPile: effects.addCard ? [...s.discardPile, effects.addCard] : s.discardPile,
+      })
+    }
+  },
+
+  confirmAutoEvent: () => {
+    const s = get()
+    if (!s.currentEvent || s.phase !== 'event') return
+    if (!s.currentEvent.autoEffects) return
+
+    const effects = s.currentEvent.autoEffects
+    const player = { ...s.player }
+    const log = get().log
+
+    // 应用自动效果
+    if (effects.hp) {
+      player.hp = Math.max(1, Math.min(player.maxHp, player.hp + effects.hp))
+      log(`❤️ HP ${effects.hp > 0 ? '+' : ''}${effects.hp}（${player.hp}/${player.maxHp}）`)
+    }
+    if (effects.san) {
+      player.san = Math.max(0, Math.min(player.maxSan, player.san + effects.san))
+      log(`🧠 理智 ${effects.san > 0 ? '+' : ''}${effects.san}（${player.san}/${player.maxSan}）`)
+    }
+    if (effects.gold) {
+      player.gold = Math.max(0, player.gold + effects.gold)
+      log(`💰 金币 ${effects.gold > 0 ? '+' : ''}${effects.gold}（${player.gold}）`)
+    }
+    if (effects.shaqi) {
+      player.shaqi = Math.max(0, Math.min(player.maxShaqi, player.shaqi + effects.shaqi))
+      log(`🔥 煞气 ${effects.shaqi > 0 ? '+' : ''}${effects.shaqi}（${player.shaqi}）`)
+    }
+
+    // 标记节点完成，返回地图
+    if (s.map && s.selectedNodeId) {
+      const updatedMap = {
+        ...s.map,
+        nodes: s.map.nodes.map(n =>
+          n.id === s.selectedNodeId ? { ...n, completed: true } : n
+        )
+      }
+
+      set({
+        phase: 'map',
+        player,
+        map: updatedMap,
+        currentNodeId: s.selectedNodeId,
+        selectedNodeId: null,
+        currentEvent: null,
+      })
+    }
   },
 }),
     {

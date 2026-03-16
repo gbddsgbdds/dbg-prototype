@@ -10,6 +10,8 @@ import { GameOverScreen } from './components/GameOverScreen'
 import { Changelog } from './components/Changelog'
 import { DeckViewer } from './components/DeckViewer'
 import { MapScreen } from './components/MapScreen'
+import { ShopScreen } from './components/ShopScreen'
+import { EventScreen } from './components/EventScreen'
 import './App.css'
 
 // Boss阶段切换提示组件
@@ -134,6 +136,24 @@ function App() {
             <span className="status-value">{player.gold}</span>
           </div>
         </div>
+      </div>
+    )
+  }
+
+  // 商店界面
+  if (phase === 'shop') {
+    return (
+      <div className="game-wrapper shop-wrapper">
+        <ShopScreen />
+      </div>
+    )
+  }
+
+  // 事件界面
+  if (phase === 'event') {
+    return (
+      <div className="game-wrapper event-wrapper">
+        <EventScreen />
       </div>
     )
   }
