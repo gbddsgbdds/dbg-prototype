@@ -191,3 +191,84 @@
     justify-content: center;
   }
 }
+
+/* 手机端深度适配 (375px及以下) */
+@media (max-width: 400px) {
+  .event-screen {
+    padding: 12px;
+  }
+  
+  .event-container {
+    gap: 16px;
+  }
+  
+  .event-card {
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .event-title {
+    font-size: 1.2rem;
+    margin-bottom: 12px;
+  }
+
+  .event-description {
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  
+  .event-choices {
+    gap: 8px;
+  }
+  
+  .choices-title {
+    font-size: 0.8rem;
+    margin-bottom: 6px;
+  }
+
+  .event-choice-btn {
+    padding: 10px 12px;
+    border-radius: 10px;
+    gap: 3px;
+  }
+
+  .choice-text {
+    font-size: 0.9rem;
+  }
+
+  .choice-effects {
+    font-size: 0.75rem;
+  }
+  
+  .event-auto {
+    gap: 16px;
+  }
+
+  .auto-effects {
+    gap: 10px;
+  }
+
+  .effect-item {
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    gap: 6px;
+  }
+
+  .effect-icon {
+    font-size: 1.2rem;
+  }
+
+  .effect-label {
+    font-size: 0.85rem;
+  }
+
+  .effect-value {
+    font-size: 0.95rem;
+  }
+
+  .confirm-btn {
+    padding: 10px 30px;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+}

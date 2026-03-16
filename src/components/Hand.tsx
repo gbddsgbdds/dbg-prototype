@@ -56,7 +56,7 @@ export function Hand() {
             ) : (
               <>
                 <div className="card-image">
-                  <img src={getPlaceholderUrl(card.icon || card.name)} alt={card.name} />
+                  <img src={getPlaceholderUrl(card.id)} alt={card.name} />
                 </div>
                 <div className="card-name">{card.name}</div>
                 <div className="card-desc">{card.description}</div>

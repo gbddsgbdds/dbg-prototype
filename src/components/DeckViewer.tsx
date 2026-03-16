@@ -78,7 +78,7 @@ export function DeckViewer() {
                   uniqueCards.map(({ card, count }) => (
                     <div key={card.id} className="deck-card-item">
                       <div className="deck-card-icon">
-                        <img src={getPlaceholderUrl(card.icon || card.name, 60, 80)} alt={card.name} />
+                        <img src={getPlaceholderUrl(card.id, 60, 80)} alt={card.name} />
                       </div>
                       <div className="deck-card-info">
                         <span className="deck-card-name">{card.name}</span>

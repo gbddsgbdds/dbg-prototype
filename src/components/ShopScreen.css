@@ -248,4 +248,125 @@
     gap: 12px;
     text-align: center;
   }
+  
+  .shop-screen {
+    padding: 12px;
+  }
+  
+  .shop-card {
+    padding: 12px;
+  }
+  
+  .card-desc {
+    font-size: 0.85rem;
+  }
+  
+  .remove-cards {
+    gap: 6px;
+  }
+  
+  .remove-card-btn {
+    padding: 6px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+/* 手机端深度适配 (375px及以下) */
+@media (max-width: 400px) {
+  .shop-screen {
+    padding: 8px;
+  }
+  
+  .shop-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+  
+  .shop-header h2 {
+    font-size: 1.3rem;
+  }
+  
+  .player-gold {
+    font-size: 1rem;
+    padding: 6px 12px;
+  }
+  
+  .shop-section {
+    margin-bottom: 20px;
+  }
+  
+  .shop-section h3 {
+    font-size: 1rem;
+    margin-bottom: 10px;
+  }
+  
+  .remove-cost {
+    font-size: 0.8rem;
+  }
+  
+  .shop-card {
+    padding: 10px;
+    gap: 6px;
+  }
+  
+  .card-header {
+    gap: 6px;
+  }
+  
+  .card-cost {
+    width: 24px;
+    height: 24px;
+    font-size: 0.85rem;
+  }
+  
+  .card-name {
+    font-size: 0.9rem;
+  }
+  
+  .card-rarity {
+    font-size: 0.65rem;
+    padding: 1px 4px;
+  }
+  
+  .card-type {
+    font-size: 0.7rem;
+  }
+  
+  .card-desc {
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  
+  .card-price {
+    padding: 6px;
+    font-size: 1rem;
+  }
+  
+  .buy-btn {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+  
+  .remove-section {
+    padding: 10px;
+  }
+  
+  .remove-hint {
+    font-size: 0.85rem;
+  }
+  
+  .remove-card-btn {
+    padding: 5px 10px;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+  
+  .leave-btn {
+    padding: 10px 30px;
+    font-size: 1rem;
+  }
+  
+  .shop-actions {
+    margin-top: 20px;
+  }
 }

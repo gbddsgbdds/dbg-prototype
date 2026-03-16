@@ -53,7 +53,7 @@ export function Enemy() {
         animate={enemy.hp <= 0 ? { scale: 0, rotate: 180, opacity: 0 } : isMad ? { x: [0, -2, 2, 0] } : isEnraged ? { scale: [1, 1.03, 1] } : {}}
         transition={isMad ? { repeat: Infinity, duration: 0.1 } : isEnraged ? { repeat: Infinity, duration: 0.3 } : {}}
       >
-        <img src={getEnemyPlaceholderUrl(enemy.def.icon || enemy.def.name)} alt={enemy.def.name} />
+        <img src={getEnemyPlaceholderUrl(enemy.def.id)} alt={enemy.def.name} />
       </motion.div>
       <div className="enemy-name">
         {enemy.def.name}{enemyTypeLabel()}

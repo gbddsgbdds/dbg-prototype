@@ -524,12 +524,116 @@ body {
 
 /* === 响应式 === */
 @media (max-width: 600px) {
+  /* 卡牌 */
   .card { width: 100px; min-height: 150px; }
   .card-image { width: 85px; height: 60px; }
-  .hp-bar { width: 140px; }
-  .san-bar { width: 120px; }
-  .shaqi-bar { width: 140px; }
+  .card-cost { width: 24px; height: 24px; font-size: 0.8rem; top: -6px; left: -6px; }
+  .card-name { font-size: 0.75rem; }
+  .card-desc { font-size: 0.6rem; }
+  .card-type { font-size: 0.6rem; }
+  
+  /* 状态条 */
+  .hp-bar { width: 140px; height: 20px; }
+  .san-bar { width: 120px; height: 14px; }
+  .shaqi-bar { width: 140px; height: 16px; }
+  .hp-text { font-size: 0.7rem; }
+  .san-text { font-size: 0.6rem; }
+  .shaqi-text { font-size: 0.6rem; }
+  
+  /* 玩家状态栏 */
   .player-info { gap: 0.4rem; }
+  .player-status { padding: 0.4rem 0.6rem; flex-wrap: wrap; }
+  .energy-orb { font-size: 0.9rem; }
+  .end-turn-btn { padding: 0.4rem 0.8rem; font-size: 0.8rem; }
+  
+  /* 手牌区域 */
+  .hand-area { min-height: 170px; gap: 0.3rem; padding: 0.3rem; }
+  
+  /* 战斗日志 */
+  .battle-log { font-size: 0.7rem; padding: 0.4rem; }
+}
+
+/* === 手机端深度适配 (375px及以下) === */
+@media (max-width: 400px) {
+  /* 开始界面 */
+  .start-screen h1 { font-size: 2rem; }
+  .subtitle { font-size: 1rem; }
+  .subtitle.small { font-size: 0.75rem; }
+  .start-btn { padding: 0.6rem 1.8rem; font-size: 1rem; }
+  .start-footer { bottom: 1.5rem; flex-direction: column; gap: 0.5rem; }
+  
+  /* 卡牌 - 更紧凑 */
+  .card { width: 85px; min-height: 130px; border-radius: 8px; }
+  .card-image { width: 70px; height: 50px; margin-top: 0.3rem; }
+  .card-cost { width: 22px; height: 22px; font-size: 0.75rem; }
+  .card-name { font-size: 0.7rem; margin-top: 0.15rem; }
+  .card-desc { font-size: 0.55rem; padding: 0.1rem 0.3rem; line-height: 1.2; }
+  .card-class { font-size: 0.55rem; }
+  .card-type { font-size: 0.55rem; padding-bottom: 0.2rem; }
+  
+  /* 状态条 - 更紧凑 */
+  .hp-bar { width: 100px; height: 18px; }
+  .san-bar { width: 90px; height: 12px; }
+  .shaqi-bar { width: 100px; height: 14px; }
+  .hp-text { font-size: 0.65rem; }
+  .san-text { font-size: 0.55rem; }
+  .shaqi-text { font-size: 0.55rem; }
+  
+  /* 道心 */
+  .daoxin-bar { font-size: 0.65rem; }
+  
+  /* 玩家状态栏 */
+  .player-status { padding: 0.3rem 0.4rem; gap: 0.3rem; }
+  .player-info { gap: 0.25rem; }
+  .energy-orb { font-size: 0.8rem; }
+  .mad-label { font-size: 0.7rem; }
+  .end-turn-btn { padding: 0.35rem 0.6rem; font-size: 0.75rem; border-radius: 8px; }
+  
+  /* Buff */
+  .buff { font-size: 0.55rem; padding: 0.1rem 0.3rem; }
+  
+  /* 手牌区域 */
+  .hand-area { min-height: 150px; gap: 0.25rem; padding: 0.25rem; }
+  
+  /* 敌人区域 */
+  .enemy-area { padding: 0.3rem; }
+  .enemy img { width: 90px; height: 90px; }
+  .enemy-name { font-size: 0.9rem; }
+  .enemy-intent { font-size: 0.85rem; padding: 0.2rem 0.6rem; }
+  
+  /* 战斗日志 */
+  .battle-log { font-size: 0.65rem; padding: 0.3rem; line-height: 1.3; }
+  .log-entry { margin-bottom: 0.1rem; }
+  
+  /* 游戏容器 */
+  .game-container { padding: 0.5rem; gap: 0.3rem; }
+  
+  /* 覆盖层 */
+  .victory-panel, .gameover-panel { padding: 1.2rem; min-width: 260px; }
+  .victory-panel h2, .gameover-panel h2 { font-size: 1.3rem; }
+  .victory-panel button, .gameover-panel button { padding: 0.5rem 1.5rem; font-size: 0.9rem; }
+  
+  /* 奖励卡牌 */
+  .reward-cards { gap: 0.4rem; }
+  .reward-card { width: 90px; min-height: 120px; }
+  
+  /* 牌组查看 */
+  .deck-panel { padding: 1rem; }
+  .deck-panel h2 { font-size: 1.1rem; }
+  .deck-stats { font-size: 0.75rem; gap: 1rem; }
+  .deck-tabs button { font-size: 0.7rem; padding: 0.25rem 0.6rem; }
+  .deck-card-item { padding: 0.4rem; gap: 0.6rem; }
+  .deck-card-icon { width: 40px; height: 55px; }
+  .deck-card-name { font-size: 0.8rem; }
+  .deck-card-desc { font-size: 0.65rem; }
+  .deck-card-count { font-size: 0.85rem; padding: 0.25rem 0.5rem; }
+  
+  /* Boss阶段提示 */
+  .boss-phase-text { font-size: 2rem; }
+  .boss-phase-sub { font-size: 1rem; }
+  
+  /* 驱魔符提示 */
+  .exorcism-hint { font-size: 0.75rem; padding: 0.25rem; }
 }
 
 /* === 更新日志 === */
@@ -921,5 +1025,27 @@ body {
 
 .status-item.gold .status-value {
   color: var(--gold);
+}
+
+/* 地图状态栏移动端适配 */
+@media (max-width: 400px) {
+  .map-player-status {
+    gap: 0.8rem;
+    padding: 0.6rem;
+  }
+  
+  .status-item {
+    padding: 0.4rem 0.6rem;
+    min-width: 60px;
+    border-radius: 6px;
+  }
+  
+  .status-label {
+    font-size: 0.6rem;
+  }
+  
+  .status-value {
+    font-size: 0.8rem;
+  }
 }
 
