@@ -35,6 +35,7 @@ export interface CardDef {
   description: string
   effects: CardEffect
   icon?: string
+  isHallucination?: boolean  // 心素幻觉牌标记
 }
 
 // 敌人意图

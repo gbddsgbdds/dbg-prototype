@@ -43,6 +43,7 @@ interface GameState {
   battleLog: string[]
   animating: boolean
   rewardCards: CardDef[] | null
+  exorcismMode: boolean  // 驱魔符选择模式
   log: (msg: string) => void
   newGame: () => void
   playCard: (index: number) => void
@@ -50,6 +51,7 @@ interface GameState {
   nextEnemy: () => void
   addCard: (card: CardDef) => void
   skipReward: () => void
+  useExorcismTalisman: (index: number) => void  // 驱魔符翻面
 }
 
 function mkPlayer(): PlayerState {

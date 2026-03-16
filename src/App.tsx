@@ -6,6 +6,7 @@ import { PlayerStatus } from './components/PlayerStatus'
 import { BattleLog } from './components/BattleLog'
 import { VictoryScreen } from './components/VictoryScreen'
 import { GameOverScreen } from './components/GameOverScreen'
+import { Changelog } from './components/Changelog'
 import './App.css'
 
 function App() {
@@ -34,6 +35,10 @@ function App() {
         >
           开始修仙
         </motion.button>
+        <div className="start-footer">
+          <Changelog />
+          <span className="version-tag">v0.3.0</span>
+        </div>
       </div>
     )
   }
