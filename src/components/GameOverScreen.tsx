@@ -2,6 +2,7 @@ import { useGameStore } from '../game/store'
 import { useMetaStore } from '../game/meta'
 import { motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
+import { playSound } from '../utils/soundManager'
 
 export function GameOverScreen() {
   const player = useGameStore(s => s.player)
@@ -14,6 +15,8 @@ export function GameOverScreen() {
   useEffect(() => {
     if (!defeatTriggered.current) {
       defeatTriggered.current = true
+      // 播放失败音效
+      playSound('defeat')
       useMetaStore.getState().checkAchievements({ type: 'defeat' })
     }
   }, [])

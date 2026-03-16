@@ -2,6 +2,7 @@ import { useGameStore } from '../game/store'
 import { useMetaStore } from '../game/meta'
 import { motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
+import { playSound } from '../utils/soundManager'
 
 export function VictoryScreen() {
   const rewardCards = useGameStore(s => s.rewardCards)
@@ -25,10 +26,12 @@ export function VictoryScreen() {
   // 用于防止重复触发成就
   const victoryTriggered = useRef(false)
   
-  // 触发胜利成就（仅一次）
+  // 触发胜利成就和音效（仅一次）
   useEffect(() => {
     if (isFinalBossVictory && !victoryTriggered.current) {
       victoryTriggered.current = true
+      // 播放胜利音效
+      playSound('victory')
       const metaStore = useMetaStore.getState()
       metaStore.checkAchievements({
         type: 'victory',
@@ -42,6 +45,13 @@ export function VictoryScreen() {
       }
     }
   }, [isFinalBossVictory, characterId, turn, player.hp, player.isMad])
+  
+  // 普通战斗胜利音效
+  useEffect(() => {
+    if (!isFinalBossVictory) {
+      playSound('victory')
+    }
+  }, [isFinalBossVictory])
 
   // 最终Boss胜利结算
   if (isFinalBossVictory && !rewardCards) {

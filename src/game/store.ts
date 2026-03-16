@@ -577,6 +577,8 @@ export const useGameStore = create<GameState>()(
       dp = newDraw
       disc = newDiscard
       log(`📥 抽 ${drawCount} 张牌`)
+      // 抽牌音效
+      playSound('card')
     }
 
     // 自身 buff（力量/血肉同化/道心等）
@@ -1035,6 +1037,8 @@ export const useGameStore = create<GameState>()(
         restedPlayer.hp = Math.min(restedPlayer.maxHp, restedPlayer.hp + 20)
         restedPlayer.san = Math.min(restedPlayer.maxSan, restedPlayer.san + 15)
         log(`🔥 篝火休息：HP +20，理智 +15`)
+        // 播放治疗音效
+        playSound('heal')
         // 标记节点完成
         const restedMap = { ...s.map, nodes: s.map.nodes.map(n => n.id === node.id ? { ...n, completed: true } : n) }
         set({
@@ -1237,6 +1241,10 @@ export const useGameStore = create<GameState>()(
     if (effects.hp) {
       player.hp = Math.max(1, Math.min(player.maxHp, player.hp + effects.hp))
       log(`❤️ HP ${effects.hp > 0 ? '+' : ''}${effects.hp}（${player.hp}/${player.maxHp}）`)
+      // 治疗音效（仅在恢复HP时播放）
+      if (effects.hp > 0) {
+        playSound('heal')
+      }
     }
     if (effects.san) {
       player.san = Math.max(0, Math.min(player.maxSan, player.san + effects.san))
