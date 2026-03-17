@@ -33,16 +33,15 @@ export function VictoryScreen() {
       // 播放胜利音效
       playSound('victory')
       const metaStore = useMetaStore.getState()
+      // 检查是否在入魔状态下通关
+      const isMadnessVictory = player.isMad
       metaStore.checkAchievements({
         type: 'victory',
         characterId,
         turnCount: turn,
         playerHp: player.hp,
+        isMadnessVictory,  // 入魔状态通关会解锁坐忘道角色
       })
-      // 检查是否在入魔状态下通关
-      if (player.isMad) {
-        metaStore.unlockAchievement('madness_victory')
-      }
     }
   }, [isFinalBossVictory, characterId, turn, player.hp, player.isMad])
   

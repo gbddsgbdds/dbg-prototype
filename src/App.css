@@ -2342,3 +2342,105 @@ body {
   font-size: 1.5rem;
 }
 
+/* === 角色解锁弹窗 === */
+.character-unlock-popup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+  cursor: pointer;
+}
+
+.character-unlock-content {
+  background: linear-gradient(145deg, #2d1b4e 0%, #1a0a2e 100%);
+  border: 3px solid #ffd700;
+  border-radius: 20px;
+  padding: 2.5rem 3rem;
+  text-align: center;
+  min-width: 320px;
+  cursor: default;
+  box-shadow: 0 0 50px rgba(255, 215, 0, 0.3);
+}
+
+.character-unlock-content .unlock-icon {
+  font-size: 5rem;
+  margin-bottom: 1rem;
+}
+
+.character-unlock-content .unlock-title {
+  color: #ffd700;
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+.character-unlock-content .unlock-character-info {
+  margin-bottom: 1rem;
+}
+
+.character-unlock-content .unlock-name {
+  color: #fff;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+.character-unlock-content .unlock-title-sub {
+  color: #aa88ff;
+  font-size: 1rem;
+}
+
+.character-unlock-content .unlock-hint {
+  color: #888;
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.character-unlock-content .unlock-close-btn {
+  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 100%);
+  color: #1a0a2e;
+  border: none;
+  padding: 0.8rem 2rem;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.character-unlock-content .unlock-close-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+}
+
+/* 移动端适配 */
+@media (max-width: 400px) {
+  .character-unlock-content {
+    padding: 1.5rem;
+    min-width: 280px;
+  }
+  
+  .character-unlock-content .unlock-icon {
+    font-size: 3.5rem;
+  }
+  
+  .character-unlock-content .unlock-title {
+    font-size: 1.4rem;
+  }
+  
+  .character-unlock-content .unlock-name {
+    font-size: 1.2rem;
+  }
+  
+  .character-unlock-content .unlock-close-btn {
+    padding: 0.6rem 1.5rem;
+    font-size: 0.9rem;
+  }
+}
+

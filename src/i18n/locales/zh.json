@@ -1,0 +1,165 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "confirm": "确认",
+    "cancel": "取消",
+    "close": "关闭",
+    "start": "开始游戏",
+    "continue": "继续游戏",
+    "newGame": "新游戏",
+    "settings": "设置",
+    "back": "返回",
+    "skip": "跳过"
+  },
+  "start": {
+    "title": "道诡修仙录",
+    "subtitle": "DBG Roguelike",
+    "changelog": "更新日志",
+    "achievements": "成就",
+    "achievementsCount": "{{count}}/{{total}} 成就"
+  },
+  "character": {
+    "title": "选择角色",
+    "heartMind": {
+      "name": "心素",
+      "desc": "拥有幻觉体质，理智过低时手牌可能变成幻觉牌"
+    },
+    "fajiao": {
+      "name": "法教",
+      "desc": "道法传承者，初始拥有更强的法术卡牌"
+    },
+    "zuowang": {
+      "name": "坐忘道",
+      "desc": "骰子之道的修士，命运偏爱勇者"
+    },
+    "difficulty": "难度: {{level}}",
+    "startingHP": "初始HP: {{hp}}",
+    "startGame": "开始游戏"
+  },
+  "battle": {
+    "playerTurn": "玩家回合",
+    "enemyTurn": "敌人回合",
+    "endTurn": "结束回合",
+    "energy": "能量",
+    "turn": "回合",
+    "hp": "HP",
+    "sanity": "理智",
+    "shaqi": "煞气",
+    "block": "护甲",
+    "daoHeart": "道心",
+    "deck": "牌组",
+    "drawPile": "抽牌堆",
+    "discardPile": "弃牌堆",
+    "exhaustPile": "消耗堆",
+    "viewDeck": "查看牌组"
+  },
+  "enemy": {
+    "intent": {
+      "attack": "攻击",
+      "defend": "防御",
+      "buff": "增益",
+      "debuff": "减益",
+      "unknown": "未知"
+    },
+    "phase2": "第二阶段"
+  },
+  "map": {
+    "title": "地图",
+    "layer": "第 {{num}} 层",
+    "nodeTypes": {
+      "battle": "战斗",
+      "elite": "精英",
+      "boss": "Boss",
+      "shop": "商店",
+      "rest": "篝火",
+      "event": "事件",
+      "treasure": "宝藏"
+    },
+    "selectNode": "选择下一个节点",
+    "current": "当前位置"
+  },
+  "shop": {
+    "title": "商店",
+    "buyCards": "购买卡牌",
+    "removeCard": "移除卡牌",
+    "gold": "金币",
+    "buy": "购买",
+    "remove": "移除",
+    "notEnoughGold": "金币不足",
+    "leave": "离开商店"
+  },
+  "rest": {
+    "title": "篝火",
+    "rest": "休息 (恢复30% HP)",
+    "strengthen": "强化卡牌",
+    "removeCard": "移除卡牌",
+    "chooseAction": "选择一个行动"
+  },
+  "event": {
+    "title": "随机事件",
+    "choose": "选择你的回应",
+    "result": "结果"
+  },
+  "victory": {
+    "title": "胜利！",
+    "reward": "奖励",
+    "chooseCard": "选择一张卡牌",
+    "goldReward": "获得 {{amount}} 金币",
+    "healReward": "恢复 {{amount}} HP",
+    "continue": "继续",
+    "skipReward": "跳过奖励"
+  },
+  "gameOver": {
+    "title": "心素崩溃",
+    "subtitle": "理智耗尽，你的意识被虚无吞噬...",
+    "deathByHP": "肉身被摧毁...",
+    "deathBySanity": "理智归零，陷入永恒的疯狂...",
+    "tryAgain": "再试一次",
+    "mainMenu": "返回主菜单"
+  },
+  "madness": {
+    "title": "入魔中",
+    "phaseAlert": "狂暴阶段！",
+    "attackDoubled": "{{name}} 攻击翻倍！"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "sound": "音效",
+    "music": "音乐",
+    "volume": "音量",
+    "on": "开",
+    "off": "关",
+    "replayTutorial": "重播教程"
+  },
+  "tutorial": {
+    "title": "新手教程",
+    "step1Title": "煞气系统",
+    "step1Desc": "煞气是伤害倍率。打出攻击牌获得煞气，煞气越高伤害越高。但煞气过高会消耗理智！",
+    "step2Title": "理智系统",
+    "step3Title": "入魔机制",
+    "step3Desc": "当煞气达到100时触发入魔。入魔后伤害×3，能量+2，但战斗结束后有理智归零风险！",
+    "step4Title": "幻觉牌",
+    "step4Desc": "心素角色在煞气≥60时，手牌可能变成幻觉牌。幻觉牌打出后效果随机，可能有害！",
+    "next": "下一步",
+    "prev": "上一步",
+    "skip": "跳过教程",
+    "complete": "开始游戏"
+  },
+  "achievements": {
+    "title": "成就",
+    "unlocked": "已解锁",
+    "locked": "未解锁",
+    "progress": "进度"
+  },
+  "cards": {
+    "attack": "攻击",
+    "skill": "技能",
+    "power": "能力",
+    "damage": "造成 {{amount}} 点伤害",
+    "block": "获得 {{amount}} 护甲",
+    "draw": "抽 {{amount}} 张牌",
+    "exhaust": "消耗",
+    "ethereal": "虚无"
+  }
+}

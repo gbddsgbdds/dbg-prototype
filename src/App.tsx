@@ -1,5 +1,7 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { useState, useEffect, Suspense, lazy, useRef } from 'react'
+// 导入i18n配置（必须在其他导入之后）
+import './i18n'
 import { useGameStore, hasSaveData } from './game/store'
 import { useMetaStore } from './game/meta'
 import { Hand } from './components/Hand'
@@ -24,6 +26,7 @@ const EventScreen = lazy(() => import('./components/EventScreen').then(m => ({ d
 const CharacterSelect = lazy(() => import('./components/CharacterSelect').then(m => ({ default: m.CharacterSelect })))
 const AchievementScreen = lazy(() => import('./components/AchievementScreen').then(m => ({ default: m.AchievementScreen })))
 const AchievementPopup = lazy(() => import('./components/AchievementPopup').then(m => ({ default: m.AchievementPopup })))
+const CharacterUnlockPopup = lazy(() => import('./components/CharacterUnlockPopup').then(m => ({ default: m.CharacterUnlockPopup })))
 
 // 加载状态组件
 function LoadingFallback() {
@@ -232,6 +235,11 @@ function App() {
           <AchievementPopup />
         </Suspense>
         
+        {/* 角色解锁弹窗 */}
+        <Suspense fallback={null}>
+          <CharacterUnlockPopup />
+        </Suspense>
+        
         {/* 成就界面 */}
         <AnimatePresence>
           {showAchievements && (
@@ -419,6 +427,10 @@ function App() {
       {/* 成就弹窗 */}
       <Suspense fallback={null}>
         <AchievementPopup />
+      </Suspense>
+      {/* 角色解锁弹窗 */}
+      <Suspense fallback={null}>
+        <CharacterUnlockPopup />
       </Suspense>
     </div>
   )

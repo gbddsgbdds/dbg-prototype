@@ -207,6 +207,33 @@
   cursor: not-allowed;
 }
 
+/* 语言切换按钮 */
+.language-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.lang-btn {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.lang-btn:hover {
+  background: var(--border);
+}
+
+.lang-btn.active {
+  background: rgba(100, 150, 255, 0.2);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* 底部提示 */
 .sound-settings-footer {
   margin-top: 1.5rem;

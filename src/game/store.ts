@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { CardDef, PlayerState, EnemyState, GamePhase, BuffEffect, EnemyDef, GameMap, MapNode, MapNodeType, ShopItem, GameEvent, DamageFloatItem, CharacterDef } from './types'
-import { REWARD_CARDS, REWARD_CARDS_LAYER2, REWARD_CARDS_LAYER3, BOSS_ENEMY_LAYER3, ALL_ENEMIES, ALL_ENEMIES_LAYER2, ALL_ENEMIES_LAYER3, ELITE_ENEMY, ELITE_ENEMY_LAYER2, ELITE_ENEMY_LAYER3, ELITE_ENEMY_LAYER3_ALT, getCardsByIds } from '../data/cards'
+import { REWARD_CARDS, REWARD_CARDS_LAYER2, REWARD_CARDS_LAYER4, BOSS_ENEMY_LAYER3, ALL_ENEMIES, ALL_ENEMIES_LAYER2, ALL_ENEMIES_LAYER4, ELITE_ENEMY, ELITE_ENEMY_LAYER2, ELITE_ENEMY_LAYER4, getCardsByIds } from '../data/cards'
 import { getCharacterById, CHARACTER_XINSU } from '../data/characters'
 import { getRandomEvent } from '../data/events'
 import { playSound } from '../utils/soundManager'
@@ -102,15 +102,15 @@ function generateMap(): GameMap {
       // 为战斗节点预分配敌人（根据层数选择敌人池）
       let enemyDef: EnemyDef | undefined
       if (type === 'battle') {
-        // 第1-2层使用第1层敌人，第3层使用第2层敌人，第4层使用第3层敌人
+        // 第1-2层使用第1层敌人，第3层使用第2层敌人，第4层使用第4层专属敌人
         let enemies = ALL_ENEMIES
         if (layer === 3) enemies = ALL_ENEMIES_LAYER2
-        else if (layer >= 4) enemies = ALL_ENEMIES_LAYER3
+        else if (layer >= 4) enemies = ALL_ENEMIES_LAYER4
         enemyDef = shuffle([...enemies])[0]
       } else if (type === 'elite') {
-        // 第1-2层使用第1层精英，第3层使用第2层精英，第4层使用第3层精英（随机选择）
+        // 第1-2层使用第1层精英，第3层使用第2层精英，第4层使用第4层专属精英
         if (layer === 3) enemyDef = ELITE_ENEMY_LAYER2
-        else if (layer >= 4) enemyDef = Math.random() < 0.5 ? ELITE_ENEMY_LAYER3 : ELITE_ENEMY_LAYER3_ALT
+        else if (layer >= 4) enemyDef = ELITE_ENEMY_LAYER4
         else enemyDef = ELITE_ENEMY
       } else if (type === 'boss') {
         // 最终Boss使用第3层Boss
@@ -415,11 +415,13 @@ export const useGameStore = create<GameState>()(
       const cond = fx.conditional.condition
       switch (cond.type) {
         case 'shaqi_gte':
-          return p.shaqi >= cond.value
+          return cond.value !== undefined && p.shaqi >= cond.value
         case 'san_lte':
-          return p.san <= cond.value
+          return cond.value !== undefined && p.san <= cond.value
         case 'enemy_hp_pct_lte':
-          return (e.hp / e.maxHp) * 100 <= cond.value
+          return cond.value !== undefined && (e.hp / e.maxHp) * 100 <= cond.value
+        case 'madness':
+          return p.isMad
         default:
           return false
       }
@@ -471,6 +473,12 @@ export const useGameStore = create<GameState>()(
       if (conditionMet && fx.conditional?.damageMultiplier) {
         dmg = Math.floor(dmg * fx.conditional.damageMultiplier)
         log(`⚡ 条件达成！伤害 ×${fx.conditional.damageMultiplier}`)
+      }
+      
+      // 条件固定伤害加成
+      if (conditionMet && fx.conditional?.damageBonus) {
+        dmg += fx.conditional.damageBonus
+        log(`⚡ 条件达成！伤害 +${fx.conditional.damageBonus}`)
       }
       
       if (isVuln) dmg = Math.floor(dmg * 1.5)
@@ -685,7 +693,7 @@ export const useGameStore = create<GameState>()(
       const currentLayer = s.map?.nodes.find(n => n.id === s.selectedNodeId)?.layer ?? 1
       let rewardPool = REWARD_CARDS
       if (currentLayer === 3) rewardPool = REWARD_CARDS_LAYER2
-      else if (currentLayer >= 4) rewardPool = REWARD_CARDS_LAYER3
+      else if (currentLayer >= 4) rewardPool = REWARD_CARDS_LAYER4
 
       set({
         player: p, enemy: e, hand, drawPile: dp, discardPile: disc,
@@ -1060,7 +1068,7 @@ export const useGameStore = create<GameState>()(
         const currentLayer = node.layer
         let shopPool = REWARD_CARDS
         if (currentLayer === 3) shopPool = REWARD_CARDS_LAYER2
-        else if (currentLayer >= 4) shopPool = REWARD_CARDS_LAYER3
+        else if (currentLayer >= 4) shopPool = REWARD_CARDS_LAYER4
         const shopCards = shuffle([...shopPool]).slice(0, 4)
         const items: ShopItem[] = shopCards.map(card => ({
           card,

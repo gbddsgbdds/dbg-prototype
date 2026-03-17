@@ -1,0 +1,165 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "cancel": "Cancel",
+    "close": "Close",
+    "start": "Start Game",
+    "continue": "Continue",
+    "newGame": "New Game",
+    "settings": "Settings",
+    "back": "Back",
+    "skip": "Skip"
+  },
+  "start": {
+    "title": "Dao Gui Xian Lu",
+    "subtitle": "DBG Roguelike",
+    "changelog": "Changelog",
+    "achievements": "Achievements",
+    "achievementsCount": "{{count}}/{{total}} Achievements"
+  },
+  "character": {
+    "title": "Select Character",
+    "heartMind": {
+      "name": "Heart Mind",
+      "desc": "Has hallucination constitution. Cards may become illusions when sanity is low"
+    },
+    "fajiao": {
+      "name": "Fa Jiao",
+      "desc": "Taoist practitioner with stronger spell cards"
+    },
+    "zuowang": {
+      "name": "Zuo Wang Dao",
+      "desc": "Dice cultivator. Fortune favors the bold"
+    },
+    "difficulty": "Difficulty: {{level}}",
+    "startingHP": "Starting HP: {{hp}}",
+    "startGame": "Start Game"
+  },
+  "battle": {
+    "playerTurn": "Player Turn",
+    "enemyTurn": "Enemy Turn",
+    "endTurn": "End Turn",
+    "energy": "Energy",
+    "turn": "Turn",
+    "hp": "HP",
+    "sanity": "Sanity",
+    "shaqi": "Shaqi",
+    "block": "Block",
+    "daoHeart": "Dao Heart",
+    "deck": "Deck",
+    "drawPile": "Draw Pile",
+    "discardPile": "Discard Pile",
+    "exhaustPile": "Exhaust Pile",
+    "viewDeck": "View Deck"
+  },
+  "enemy": {
+    "intent": {
+      "attack": "Attack",
+      "defend": "Defend",
+      "buff": "Buff",
+      "debuff": "Debuff",
+      "unknown": "Unknown"
+    },
+    "phase2": "Phase 2"
+  },
+  "map": {
+    "title": "Map",
+    "layer": "Layer {{num}}",
+    "nodeTypes": {
+      "battle": "Battle",
+      "elite": "Elite",
+      "boss": "Boss",
+      "shop": "Shop",
+      "rest": "Rest",
+      "event": "Event",
+      "treasure": "Treasure"
+    },
+    "selectNode": "Select next node",
+    "current": "Current Location"
+  },
+  "shop": {
+    "title": "Shop",
+    "buyCards": "Buy Cards",
+    "removeCard": "Remove Card",
+    "gold": "Gold",
+    "buy": "Buy",
+    "remove": "Remove",
+    "notEnoughGold": "Not enough gold",
+    "leave": "Leave Shop"
+  },
+  "rest": {
+    "title": "Campfire",
+    "rest": "Rest (Recover 30% HP)",
+    "strengthen": "Strengthen Card",
+    "removeCard": "Remove Card",
+    "chooseAction": "Choose an action"
+  },
+  "event": {
+    "title": "Random Event",
+    "choose": "Choose your response",
+    "result": "Result"
+  },
+  "victory": {
+    "title": "Victory!",
+    "reward": "Reward",
+    "chooseCard": "Choose a Card",
+    "goldReward": "Gained {{amount}} Gold",
+    "healReward": "Recovered {{amount}} HP",
+    "continue": "Continue",
+    "skipReward": "Skip Reward"
+  },
+  "gameOver": {
+    "title": "Heart Mind Collapse",
+    "subtitle": "Sanity depleted, your consciousness consumed by the void...",
+    "deathByHP": "Your body was destroyed...",
+    "deathBySanity": "Sanity reached zero, trapped in eternal madness...",
+    "tryAgain": "Try Again",
+    "mainMenu": "Main Menu"
+  },
+  "madness": {
+    "title": "MADNESS",
+    "phaseAlert": "ENRAGED!",
+    "attackDoubled": "{{name}} attack doubled!"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "sound": "Sound",
+    "music": "Music",
+    "volume": "Volume",
+    "on": "On",
+    "off": "Off",
+    "replayTutorial": "Replay Tutorial"
+  },
+  "tutorial": {
+    "title": "Tutorial",
+    "step1Title": "Shaqi System",
+    "step1Desc": "Shaqi is a damage multiplier. Attack cards grant Shaqi. Higher Shaqi = more damage, but costs sanity!",
+    "step2Title": "Sanity System",
+    "step3Title": "Madness Mechanic",
+    "step3Desc": "When Shaqi reaches 100, madness triggers. Madness: damage ×3, energy +2, but risk of sanity zero after battle!",
+    "step4Title": "Illusion Cards",
+    "step4Desc": "Heart Mind characters may have cards become illusions when Shaqi ≥ 60. Illusions have random effects, possibly harmful!",
+    "next": "Next",
+    "prev": "Previous",
+    "skip": "Skip Tutorial",
+    "complete": "Start Game"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "unlocked": "Unlocked",
+    "locked": "Locked",
+    "progress": "Progress"
+  },
+  "cards": {
+    "attack": "Attack",
+    "skill": "Skill",
+    "power": "Power",
+    "damage": "Deal {{amount}} damage",
+    "block": "Gain {{amount}} block",
+    "draw": "Draw {{amount}} cards",
+    "exhaust": "Exhaust",
+    "ethereal": "Ethereal"
+  }
+}

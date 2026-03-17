@@ -38,16 +38,27 @@ export interface GameStats {
   totalPlayTime: number  // 总游戏时间（分钟）
 }
 
+// 角色解锁弹窗
+export interface CharacterUnlockPopup {
+  characterId: string
+  characterName: string
+  characterTitle: string
+  icon: string
+}
+
 export interface MetaState {
   achievements: Achievement[]
   stats: GameStats
   unlockedCharacters: string[]  // 已解锁角色ID
   pendingPopups: Achievement[]  // 待显示的成就弹窗
+  pendingCharacterUnlocks: CharacterUnlockPopup[]  // 待显示的角色解锁弹窗
   
   // 方法
   unlockAchievement: (id: string) => void
+  unlockCharacter: (characterId: string) => void
   checkAchievements: (event: AchievementCheckEvent) => void
   dismissPopup: () => void
+  dismissCharacterUnlock: () => void
   resetProgress: () => void
 }
 
@@ -58,6 +69,7 @@ export interface AchievementCheckEvent {
   characterId?: string
   turnCount?: number
   playerHp?: number
+  isMadnessVictory?: boolean  // 是否在入魔状态下通关
 }
 
 // ==================== 成就定义 ====================
@@ -120,6 +132,7 @@ export const useMetaStore = create<MetaState>()(
       stats: initialStats,
       unlockedCharacters: ['xinsu'],  // 心素默认解锁
       pendingPopups: [],
+      pendingCharacterUnlocks: [],
 
   unlockAchievement: (id: string) => {
     const s = get()
@@ -138,6 +151,32 @@ export const useMetaStore = create<MetaState>()(
     })
     
     console.log(`🏆 成就解锁: ${achievement.name}`)
+  },
+
+  unlockCharacter: (characterId: string) => {
+    const s = get()
+    if (s.unlockedCharacters.includes(characterId)) return
+    
+    // 角色信息映射
+    const characterInfo: Record<string, { name: string; title: string; icon: string }> = {
+      fajiao: { name: '张道陵', title: '法教弟子', icon: '📜' },
+      zuowang: { name: '骰子', title: '坐忘道人', icon: '🎭' },
+    }
+    
+    const info = characterInfo[characterId]
+    if (!info) return
+    
+    set({
+      unlockedCharacters: [...s.unlockedCharacters, characterId],
+      pendingCharacterUnlocks: [...s.pendingCharacterUnlocks, {
+        characterId,
+        characterName: info.name,
+        characterTitle: info.title,
+        icon: info.icon,
+      }]
+    })
+    
+    console.log(`🎭 角色解锁: ${info.name}`)
   },
 
   checkAchievements: (event: AchievementCheckEvent) => {
@@ -190,12 +229,16 @@ export const useMetaStore = create<MetaState>()(
     set({ stats })
     
     // 检查成就解锁条件
-    const { unlockAchievement } = get()
+    const { unlockAchievement, unlockCharacter } = get()
     
     // 首次成就
     if (event.type === 'victory') {
       unlockAchievement('first_victory')
-      if (event.characterId === 'xinsu') unlockAchievement('first_character_xinsu')
+      if (event.characterId === 'xinsu') {
+        unlockAchievement('first_character_xinsu')
+        // 心素通关一次解锁法教
+        unlockCharacter('fajiao')
+      }
       if (event.characterId === 'fajiao') unlockAchievement('first_character_fajiao')
       if (event.characterId === 'zuowang') unlockAchievement('first_character_zuowang')
       
@@ -241,6 +284,12 @@ export const useMetaStore = create<MetaState>()(
     
     if (stats.totalRuns >= 5) unlockAchievement('run_5')
     if (stats.totalRuns >= 10) unlockAchievement('run_10')
+    
+    // 入魔状态下击败Boss解锁坐忘道
+    if (event.type === 'victory' && event.isMadnessVictory) {
+      unlockAchievement('madness_victory')
+      unlockCharacter('zuowang')
+    }
   },
 
   dismissPopup: () => {
@@ -249,12 +298,19 @@ export const useMetaStore = create<MetaState>()(
     set({ pendingPopups: remaining })
   },
 
+  dismissCharacterUnlock: () => {
+    const s = get()
+    const remaining = s.pendingCharacterUnlocks.slice(1)
+    set({ pendingCharacterUnlocks: remaining })
+  },
+
   resetProgress: () => {
     set({
       achievements: ACHIEVEMENT_DEFS.map(def => ({ ...def, unlocked: false })),
       stats: initialStats,
       unlockedCharacters: ['xinsu'],
       pendingPopups: [],
+      pendingCharacterUnlocks: [],
     })
   },
 }),

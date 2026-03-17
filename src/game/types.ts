@@ -62,17 +62,19 @@ export type ConditionType =
   | 'shaqi_gte'        // 煞气 >= 值
   | 'san_lte'          // 理智 <= 值
   | 'enemy_hp_pct_lte' // 敌人HP百分比 <= 值 (0-100)
+  | 'madness'          // 已入魔
 
 export interface ConditionEffect {
   condition: {
     type: ConditionType
-    value: number
+    value?: number  // 可选，某些条件类型不需要值
   }
   // 条件满足时的额外效果
   bonusBlock?: number
   bonusDraw?: number
   bonusSanCost?: number
   damageMultiplier?: number  // 伤害倍率
+  damageBonus?: number       // 固定伤害加成
 }
 
 export interface CardEffect {

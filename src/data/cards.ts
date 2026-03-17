@@ -1035,6 +1035,124 @@ const BLACK_LOTUS_ANCESTOR: EnemyDef = {
   icon: 'black lotus ancestor',
 }
 
+// ==================== 第 4 层敌人 ====================
+
+// 天煞 - 极高伤害+理智攻击组合
+const HEAVENLY_SHA: EnemyDef = {
+  id: 'heavenly_sha',
+  name: '天煞',
+  hp: 45,
+  type: 'normal',
+  intents: [
+    { type: 'attack', value: 18 },
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 10 },
+    { type: 'attack', value: 18 },
+    { type: 'attack', value: 22 },
+  ],
+  specialMechanics: '天降之煞，高伤害+理智攻击组合',
+  icon: 'heavenly sha',
+}
+
+// 心魔将 - 高血量+力量成长
+const HEART_DEMON_GENERAL: EnemyDef = {
+  id: 'heart_demon_general',
+  name: '心魔将',
+  hp: 55,
+  type: 'normal',
+  intents: [
+    { type: 'defend', value: 12 },
+    { type: 'attack', value: 16 },
+    { type: 'buff', value: 0, buffType: 'strength', buffAmount: 6 },
+    { type: 'attack', value: 20 },
+    { type: 'attack', value: 24 },
+  ],
+  specialMechanics: '心魔大军将领，高血量+力量成长',
+  icon: 'heart demon general',
+}
+
+// 黑莲信徒 - 诅咒型敌人
+const BLACK_LOTUS_DISCIPLE: EnemyDef = {
+  id: 'black_lotus_disciple',
+  name: '黑莲信徒',
+  hp: 38,
+  type: 'normal',
+  intents: [
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 8 },
+    { type: 'attack', value: 14 },
+    { type: 'defend', value: 10 },
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 12 },
+    { type: 'attack', value: 16 },
+  ],
+  specialMechanics: '黑莲老祖信徒，诅咒攻击',
+  icon: 'black lotus disciple',
+}
+
+// 黑莲护法 - 第4层精英
+const BLACK_LOTUS_GUARDIAN: EnemyDef = {
+  id: 'black_lotus_guardian',
+  name: '黑莲护法',
+  hp: 95,
+  type: 'elite',
+  intents: [
+    { type: 'attack', value: 18 },
+    { type: 'defend', value: 15 },
+    { type: 'buff', value: 0, buffType: 'sanDrain', buffAmount: 10 },
+    { type: 'attack', value: 22 },
+    { type: 'buff', value: 0, buffType: 'strength', buffAmount: 5 },
+    { type: 'attack', value: 26 },
+  ],
+  specialMechanics: '黑莲老祖护法，高血量+理智攻击+力量成长',
+  icon: 'black lotus guardian',
+}
+
+// ==================== 第 4 层奖励卡牌 ====================
+
+// 天命斩 - 高费高伤，入魔加成
+const HEAVENLY_JUDGMENT: CardDef = {
+  id: 'heavenly_judgment',
+  name: '天命斩',
+  type: 'attack',
+  cardClass: 'warrior',
+  cost: 3,
+  rarity: 'rare',
+  description: '造成 25 伤害。若已入魔，伤害 +15。',
+  effects: {
+    damage: 25,
+    shaqiGain: 8,
+    conditional: {
+      condition: { type: 'madness' },
+      damageBonus: 15
+    }
+  },
+  icon: 'heavenly judgment',
+}
+
+// 最终解脱 - 消耗HP造成大量伤害
+const FINAL_RELEASE: CardDef = {
+  id: 'final_release',
+  name: '最终解脱',
+  type: 'attack',
+  cardClass: 'firecraft',
+  cost: 2,
+  rarity: 'rare',
+  description: '消耗 15 HP，造成 35 伤害。',
+  effects: { damage: 35, shaqiGain: 10, hpCost: 15 },
+  icon: 'final release',
+}
+
+// 轮回护盾 - 高护甲+自我回复
+const REINCARNATION_SHIELD: CardDef = {
+  id: 'reincarnation_shield',
+  name: '轮回护盾',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 2,
+  rarity: 'rare',
+  description: '获得 20 护甲。回合结束时恢复 8 HP。',
+  effects: { block: 20, selfBuff: [{ type: 'regen', amount: 8, duration: 1 }], shaqiGain: 0 },
+  icon: 'reincarnation shield',
+}
+
 // ==================== 第 2 层导出 ====================
 
 export const REWARD_CARDS_LAYER2: CardDef[] = [
@@ -1061,6 +1179,17 @@ export const ALL_ENEMIES_LAYER3: EnemyDef[] = [SHA_DEMON, HEART_SHA, BLOOD_CORPS
 export const ELITE_ENEMY_LAYER3: EnemyDef = BLOOD_SHA_MASTER
 export const ELITE_ENEMY_LAYER3_ALT: EnemyDef = BLOOD_SHADOW
 export const BOSS_ENEMY_LAYER3: EnemyDef = BLACK_LOTUS_ANCESTOR
+
+// ==================== 第 4 层导出 ====================
+
+export const REWARD_CARDS_LAYER4: CardDef[] = [
+  HEAVENLY_JUDGMENT, FINAL_RELEASE, REINCARNATION_SHIELD,
+  // 继承第3层卡牌
+  VOID_STRIKE, SOUL_BURN, FATAL_BLADE, DAO_MERGE,
+]
+
+export const ALL_ENEMIES_LAYER4: EnemyDef[] = [HEAVENLY_SHA, HEART_DEMON_GENERAL, BLACK_LOTUS_DISCIPLE]
+export const ELITE_ENEMY_LAYER4: EnemyDef = BLACK_LOTUS_GUARDIAN
 
 // ==================== 基础导出 ====================
 
@@ -1105,6 +1234,8 @@ const ALL_CARD_DEFS: CardDef[] = [
   SOUL_DEVOUR_SLASH, CHAIN_SLASH, BLOOD_SACRIFICE_SLASH,
   MINDS_EYE, EXORCISM_CURSE, BLOOD_RITUAL, MEDITATION, BREAK_ILLUSION, HEALING_ART,
   SHAQI_ARMOR, HEART_DEMON_GUIDE, MADNESS_AMPLIFY, ILLUSION_MASTERY,
+  // 第4层专属卡牌
+  HEAVENLY_JUDGMENT, FINAL_RELEASE, REINCARNATION_SHIELD,
 ]
 
 // 卡牌ID到定义的映射

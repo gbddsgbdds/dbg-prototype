@@ -55,6 +55,71 @@
   border-color: #8b0000;
 }
 
+/* 锁定角色样式 */
+.character-card.locked {
+  cursor: not-allowed;
+  opacity: 0.7;
+  filter: grayscale(30%);
+}
+
+.character-card.locked::before {
+  background: linear-gradient(90deg, #444, #666);
+}
+
+.character-card.locked:hover {
+  border-color: #3a3a5a;
+  transform: none;
+  box-shadow: none;
+}
+
+/* 锁定遮罩 */
+.character-lock-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  z-index: 10;
+  border-radius: 16px;
+}
+
+.lock-icon {
+  font-size: 3rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+}
+
+.unlock-hint {
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffd700;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  text-align: center;
+  max-width: 200px;
+  border: 1px solid #ffd700;
+}
+
+/* 锁定按钮 */
+.character-locked-btn {
+  background: linear-gradient(135deg, #444 0%, #333 100%);
+  color: #888;
+  text-align: center;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
 .character-header {
   display: flex;
   align-items: center;

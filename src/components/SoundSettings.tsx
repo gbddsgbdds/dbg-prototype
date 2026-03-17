@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
+import { changeLanguage, getCurrentLanguage, LANGUAGES } from '../i18n'
 import { soundManager, bgmManager } from '../utils/soundManager'
 import { resetTutorial } from './Tutorial'
 import type { BGMScene } from '../utils/soundManager'
@@ -38,10 +40,12 @@ interface SoundSettingsProps {
 }
 
 export function SoundSettings({ onClose }: SoundSettingsProps) {
+  const { t } = useTranslation()
   const [soundEnabled, setSoundEnabled] = useState(soundManager.isEnabled())
   const [soundVolume, setSoundVolume] = useState(Math.round(soundManager.getVolume() * 100))
   const [bgmEnabled, setBgmEnabled] = useState(bgmManager.isEnabled())
   const [bgmVolume, setBgmVolume] = useState(Math.round(bgmManager.getVolume() * 100))
+  const [currentLang, setCurrentLang] = useState(getCurrentLanguage())
 
   // 从 localStorage 恢复设置
   useEffect(() => {
@@ -122,6 +126,12 @@ export function SoundSettings({ onClose }: SoundSettingsProps) {
   // 测试音效
   const handleTestSound = () => {
     soundManager.playSound('card')
+  }
+
+  // 处理语言切换
+  const handleLanguageChange = (lang: 'zh' | 'en') => {
+    changeLanguage(lang)
+    setCurrentLang(lang)
   }
 
   return (
@@ -227,6 +237,22 @@ export function SoundSettings({ onClose }: SoundSettingsProps) {
           <div className="setting-section">
             <div className="section-title">🎮 游戏设置</div>
             
+            {/* 语言切换 */}
+            <div className="setting-row">
+              <span className="setting-label">{t('settings.language')}</span>
+              <div className="language-buttons">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    className={`lang-btn ${currentLang === lang.code ? 'active' : ''}`}
+                    onClick={() => handleLanguageChange(lang.code as 'zh' | 'en')}
+                  >
+                    {lang.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
             {/* 重播教程按钮 */}
             <div className="setting-row">
               <span className="setting-label">新手引导</span>
@@ -237,7 +263,7 @@ export function SoundSettings({ onClose }: SoundSettingsProps) {
                   onClose()
                 }}
               >
-                📖 重播教程
+                📖 {t('settings.replayTutorial')}
               </button>
             </div>
           </div>
