@@ -1,4 +1,4 @@
-import{f as e,l as t,t as n,u as r}from"./proxy-BrNTpP-s.js";import{a as i}from"./index-DORIqDLx.js";var a=e(r(),1),o=t(),s=`## v0.3.0 (2026-03-17)
+import{f as e,l as t,t as n,u as r}from"./proxy-BrNTpP-s.js";import{a as i}from"./index-BOUT8A0F.js";var a=e(r(),1),o=t(),s=`## v0.3.0 (2026-03-17)
 
 ### 新功能
 - 🔥 煞气系统：攻击伤害随煞气加成 0-100%
