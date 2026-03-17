@@ -743,6 +743,190 @@ const DAO_MERGE: CardDef = {
   icon: 'dao merge',
 }
 
+// ==================== 新增卡牌（v0.6.1） ====================
+
+// --- 攻击牌 ---
+
+// 噬魂斩 - 消耗理智高伤害
+const SOUL_DEVOUR_SLASH: CardDef = {
+  id: 'soul_devour_slash',
+  name: '噬魂斩',
+  type: 'attack',
+  cardClass: 'warrior',
+  cost: 2,
+  rarity: 'uncommon',
+  description: '造成 20 伤害。失去 10 理智。',
+  effects: { damage: 20, shaqiGain: 5, sanCost: 10 },
+  icon: 'soul devour slash',
+}
+
+// 连环斩 - 低伤害连击（通过打出两次实现）
+const CHAIN_SLASH: CardDef = {
+  id: 'chain_slash',
+  name: '连环斩',
+  type: 'attack',
+  cardClass: 'warrior',
+  cost: 1,
+  rarity: 'common',
+  description: '造成 8 伤害。若煞气 >= 30，伤害翻倍。',
+  effects: { 
+    damage: 8, 
+    shaqiGain: 3,
+    conditional: {
+      condition: { type: 'shaqi_gte', value: 30 },
+      damageMultiplier: 2
+    }
+  },
+  icon: 'chain slash',
+}
+
+// 血祭斩 - HP换伤害
+const BLOOD_SACRIFICE_SLASH: CardDef = {
+  id: 'blood_sacrifice_slash',
+  name: '血祭斩',
+  type: 'attack',
+  cardClass: 'warrior',
+  cost: 1,
+  rarity: 'uncommon',
+  description: '消耗 8 HP，造成 18 伤害。',
+  effects: { damage: 18, shaqiGain: 6, hpCost: 8 },
+  icon: 'blood sacrifice slash',
+}
+
+// --- 技能牌 ---
+
+// 心眼 - 抽牌+护甲
+const MINDS_EYE: CardDef = {
+  id: 'minds_eye',
+  name: '心眼',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'common',
+  description: '获得 4 护甲，抽 1 张牌。',
+  effects: { block: 4, draw: 1, shaqiGain: 0 },
+  icon: 'minds eye',
+}
+
+// 驱邪咒 - 移除debuff
+const EXORCISM_CURSE: CardDef = {
+  id: 'exorcism_curse',
+  name: '驱邪咒',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'uncommon',
+  description: '清除所有负面状态。获得 5 煞气。',
+  effects: { selfBuff: [{ type: 'cleanse', amount: 1, duration: 0 }], shaqiGain: 5 },
+  icon: 'exorcism curse',
+}
+
+// 血祭仪式 - HP换煞气
+const BLOOD_RITUAL: CardDef = {
+  id: 'blood_ritual',
+  name: '血祭仪式',
+  type: 'skill',
+  cardClass: 'firecraft',
+  cost: 0,
+  rarity: 'common',
+  description: '消耗 6 HP，获得 15 煞气。',
+  effects: { hpCost: 6, shaqiGain: 15 },
+  icon: 'blood ritual',
+}
+
+// 冥想 - 获得道心
+const MEDITATION: CardDef = {
+  id: 'meditation',
+  name: '冥想',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'common',
+  description: '获得 3 层道心。',
+  effects: { selfBuff: [{ type: 'daoxin', amount: 3, duration: 999 }] },
+  icon: 'meditation',
+}
+
+// 破魔眼 - 视幻觉为真
+const BREAK_ILLUSION: CardDef = {
+  id: 'break_illusion',
+  name: '破魔眼',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'rare',
+  description: '本回合所有幻觉牌视为真牌。',
+  effects: { selfBuff: [{ type: 'trueSight', amount: 1, duration: 1 }] },
+  icon: 'break illusion',
+}
+
+// 回春术 - 恢复HP（通过自buff实现）
+const HEALING_ART: CardDef = {
+  id: 'healing_art',
+  name: '回春术',
+  type: 'skill',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'common',
+  description: '恢复 8 HP。',
+  effects: { selfBuff: [{ type: 'regen', amount: 8, duration: 0 }] },
+  icon: 'healing art',
+}
+
+// --- 能力牌 ---
+
+// 煞气护体 - 受伤获得煞气
+const SHAQI_ARMOR: CardDef = {
+  id: 'shaqi_armor',
+  name: '煞气护体',
+  type: 'power',
+  cardClass: 'warrior',
+  cost: 1,
+  rarity: 'uncommon',
+  description: '每当受到伤害，获得 2 煞气。',
+  effects: { selfBuff: [{ type: 'shaqiOnHit', amount: 2, duration: 999 }] },
+  icon: 'shaqi armor',
+}
+
+// 心魔引 - 入魔恢复理智
+const HEART_DEMON_GUIDE: CardDef = {
+  id: 'heart_demon_guide',
+  name: '心魔引',
+  type: 'power',
+  cardClass: 'sorcerer',
+  cost: 2,
+  rarity: 'rare',
+  description: '入魔结束时恢复 30 理智。',
+  effects: { selfBuff: [{ type: 'sanRecoveryOnMadnessEnd', amount: 30, duration: 999 }] },
+  icon: 'heart demon guide',
+}
+
+// 疯狂增幅 - 入魔伤害提升
+const MADNESS_AMPLIFY: CardDef = {
+  id: 'madness_amplify',
+  name: '疯狂增幅',
+  type: 'power',
+  cardClass: 'firecraft',
+  cost: 1,
+  rarity: 'uncommon',
+  description: '入魔时额外获得 50% 伤害加成。',
+  effects: { selfBuff: [{ type: 'madnessDamageBoost', amount: 50, duration: 999 }] },
+  icon: 'madness amplify',
+}
+
+// 幻觉掌控 - 降低幻觉概率
+const ILLUSION_MASTERY: CardDef = {
+  id: 'illusion_mastery',
+  name: '幻觉掌控',
+  type: 'power',
+  cardClass: 'sorcerer',
+  cost: 1,
+  rarity: 'uncommon',
+  description: '幻觉牌出现概率降低 50%。',
+  effects: { selfBuff: [{ type: 'reduceIllusionChance', amount: 50, duration: 999 }] },
+  icon: 'illusion mastery',
+}
+
 // ==================== 第 3 层敌人 ====================
 
 // 煞魔 - 高伤害成长型
@@ -867,6 +1051,10 @@ export const REWARD_CARDS_LAYER3: CardDef[] = [
   VOID_STRIKE, SOUL_BURN, PUPPET_MASTER,
   DEMON_POSSESS, BLOOD_FURY, SPIRIT_SHIELD,
   FATAL_BLADE, DAO_MERGE,
+  // v0.6.1 新增
+  SOUL_DEVOUR_SLASH, CHAIN_SLASH, BLOOD_SACRIFICE_SLASH,
+  MINDS_EYE, EXORCISM_CURSE, BLOOD_RITUAL, MEDITATION, BREAK_ILLUSION, HEALING_ART,
+  SHAQI_ARMOR, HEART_DEMON_GUIDE, MADNESS_AMPLIFY, ILLUSION_MASTERY,
 ]
 
 export const ALL_ENEMIES_LAYER3: EnemyDef[] = [SHA_DEMON, HEART_SHA, BLOOD_CORPSE_2]
@@ -913,6 +1101,10 @@ const ALL_CARD_DEFS: CardDef[] = [
   BLOOD_SHA_SLASH, GHOST_STEP, HEARTBREAKER, NUO_DANCE, BLOOD_SACRIFICE, MIND_EYE,
   // 第3层奖励卡
   VOID_STRIKE, SOUL_BURN, PUPPET_MASTER, DEMON_POSSESS, BLOOD_FURY, SPIRIT_SHIELD, FATAL_BLADE, DAO_MERGE,
+  // v0.6.1 新增卡牌
+  SOUL_DEVOUR_SLASH, CHAIN_SLASH, BLOOD_SACRIFICE_SLASH,
+  MINDS_EYE, EXORCISM_CURSE, BLOOD_RITUAL, MEDITATION, BREAK_ILLUSION, HEALING_ART,
+  SHAQI_ARMOR, HEART_DEMON_GUIDE, MADNESS_AMPLIFY, ILLUSION_MASTERY,
 ]
 
 // 卡牌ID到定义的映射
