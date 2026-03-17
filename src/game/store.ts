@@ -228,6 +228,10 @@ interface GameState {
   // 飘字方法
   showDamageFloat: (value: number, type: DamageFloatItem['type'], target: DamageFloatItem['target']) => void
   clearDamageFloats: () => void
+  // 教程状态
+  tutorialStep: number  // -1 表示已完成/跳过
+  setTutorialStep: (step: number) => void
+  skipTutorial: () => void
 }
 
 function mkPlayer(character: CharacterDef = CHARACTER_XINSU): PlayerState {
@@ -302,6 +306,7 @@ export const useGameStore = create<GameState>()(
       removeCost: 50,
       currentEvent: null,
       damageFloats: [],
+      tutorialStep: -1,  // 初始化为 -1，由 App 层检查是否首次游戏
 
   log: (msg: string) => set(s => ({ battleLog: [...s.battleLog.slice(-50), msg] })),
 
@@ -1329,6 +1334,10 @@ export const useGameStore = create<GameState>()(
       })
     }
   },
+
+  // 教程方法
+  setTutorialStep: (step: number) => set({ tutorialStep: step }),
+  skipTutorial: () => set({ tutorialStep: -1 }),
 }),
     {
       name: SAVE_KEY,

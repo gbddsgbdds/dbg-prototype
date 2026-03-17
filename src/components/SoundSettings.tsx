@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { soundManager, bgmManager } from '../utils/soundManager'
+import { resetTutorial } from './Tutorial'
 import type { BGMScene } from '../utils/soundManager'
 import './SoundSettings.css'
 
@@ -219,6 +220,25 @@ export function SoundSettings({ onClose }: SoundSettingsProps) {
                 />
                 <span className="volume-value">{bgmVolume}%</span>
               </div>
+            </div>
+          </div>
+
+          {/* 分隔：游戏设置 */}
+          <div className="setting-section">
+            <div className="section-title">🎮 游戏设置</div>
+            
+            {/* 重播教程按钮 */}
+            <div className="setting-row">
+              <span className="setting-label">新手引导</span>
+              <button 
+                className="test-btn"
+                onClick={() => {
+                  resetTutorial()
+                  onClose()
+                }}
+              >
+                📖 重播教程
+              </button>
             </div>
           </div>
         </div>

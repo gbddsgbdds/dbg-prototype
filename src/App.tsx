@@ -8,6 +8,7 @@ import { PlayerStatus } from './components/PlayerStatus'
 import { BattleLog } from './components/BattleLog'
 import { EnemyDamageFloat, PlayerDamageFloat } from './components/DamageFloat'
 import { SoundSettings } from './components/SoundSettings'
+import { Tutorial, isTutorialCompleted } from './components/Tutorial'
 import { bgmManager } from './utils/soundManager'
 import type { BGMScene } from './utils/soundManager'
 import './App.css'
@@ -126,6 +127,20 @@ function App() {
   useEffect(() => {
     setHasSave(hasSaveData())
   }, [map])
+
+  // 教程初始化：首次进入战斗时显示教程
+  const tutorialStep = useGameStore(s => s.tutorialStep)
+  const setTutorialStep = useGameStore(s => s.setTutorialStep)
+  
+  useEffect(() => {
+    // 当进入战斗界面（有地图且不是map阶段）时，检查是否需要显示教程
+    if (map && phase !== 'map' && phase !== 'shop' && phase !== 'event') {
+      // 如果教程步骤为 -1 且 localStorage 显示未完成教程，则开始教程
+      if (tutorialStep === -1 && !isTutorialCompleted()) {
+        setTutorialStep(0)
+      }
+    }
+  }, [map, phase, tutorialStep, setTutorialStep])
 
   // BGM 场景切换逻辑
   useEffect(() => {
@@ -314,7 +329,7 @@ function App() {
             <Suspense fallback={<span>...</span>}>
               <Changelog />
             </Suspense>
-            <span className="version-tag">v0.5.8</span>
+            <span className="version-tag">v0.6.0</span>
           </div>
         </div>
       </>
@@ -399,6 +414,8 @@ function App() {
       )}
       <BossPhaseAlert />
       <MadnessOverlay />
+      {/* 教程 */}
+      <Tutorial />
       {/* 成就弹窗 */}
       <Suspense fallback={null}>
         <AchievementPopup />
